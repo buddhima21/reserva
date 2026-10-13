@@ -13,11 +13,16 @@ filters, view switching, and preview dialogs use focused Client Components.
 Prisma and Supabase connection helpers are configured. Login, immediate signup,
 and sign-out use Supabase Auth through Next.js Route Handlers. Email confirmation
 must be disabled in Supabase; the application does not use confirmation emails.
-Workspace routes require a verified session. Database-backed booking features
-are still pending; reservation screens continue to use sample data.
+Workspace routes require a verified session. Resources now support persisted
+creation, viewing, updates, safe deactivation, search, filters, and pagination.
+Database-backed booking features are still pending; dashboard, reservation, and
+availability screens continue to use sample data.
 
 See [authentication setup](docs/authentication.md) for the required Supabase
 signup configuration and testing steps.
+
+See [resource management](docs/resource-management.md) for migration, seed,
+API behavior, access rules, and integration testing.
 
 ## Local development
 
@@ -40,7 +45,10 @@ src/
     (workspace)/
       layout.tsx               Shared workspace layout; group is absent from URLs
       dashboard/page.tsx        /dashboard — sample overview and booking filters
-      resources/page.tsx        /resources — searchable sample catalog
+      resources/page.tsx        /resources — searchable saved inventory
+      resources/new/page.tsx    Create a resource
+      resources/[id]/page.tsx   Saved resource details
+      resources/[id]/edit/page.tsx  Edit or reactivate a resource
       resources/executive-meeting-room-4a/page.tsx  Supplied room details
       reservations/page.tsx     /reservations — future management entry
       reservations/new/page.tsx /reservations/new — reservation preview form
@@ -54,7 +62,7 @@ src/
     layout/dashboard-shell.tsx  Responsive navigation and content shell
     ui/page-placeholder.tsx    Shared placeholder presentation
   lib/navigation.ts            Shared navigation configuration
-  services/                    Reserved for future business logic
+  services/resources.ts        Prisma resource CRUD and search
   types/                       Shared navigation and UI preview types
 ```
 
@@ -76,8 +84,9 @@ Never put a database password or Supabase secret/service-role key in a public va
 The local `.env` file is ignored by Git.
 
 `prisma.config.ts` loads environment variables using the same loader as Next.js.
-`prisma/schema.prisma` contains an initial Resource model for client generation;
-no migration has been applied and no application tables have been created.
+`prisma/schema.prisma` contains the Resource model, operational status, and
+optional floor/image/legacy-slug metadata. Its initial migration creates the
+resources table; profile and reservation tables remain a later phase.
 The generated client lives in ignored `src/generated/prisma/` and is regenerated
 on installation, type checking, and production builds.
 
@@ -91,6 +100,8 @@ verifies the signed-in user before rendering.
 npm run db:generate
 npm run db:validate
 npm run db:check
+npm run db:migrate
+npm run db:seed
 ```
 
 The connection check performs a read-only `SELECT 1` through Prisma and calls the
@@ -122,18 +133,18 @@ tokens to avoid changing the landing theme. Icons are local SVG components. Reso
 photographs retain the supplied external URLs and use `next/image` with optimization
 disabled; no external image configuration was added.
 
-Resource filters combine search, category, current availability, capacity, and floor.
-Counts reflect the six supplied sample cards; there is no fake pagination for the
-original 32-resource mockup. Escape clears the search; Reset clears all filters.
-Grid and list presentations use the same server-rendered cards. The dashboard
+Resource filters combine database search, category, operational status, capacity,
+and floor. The six supplied cards are seeded as saved resources; counts and
+pagination reflect the database. Escape clears search; Reset clears all filters.
+Grid and list presentations use the same reusable cards. The dashboard
 supports All Today, My Bookings, and Team Bookings filters. Resource details and
-deferred operations use accessible native dialogs. No preview action creates a
-booking, checks a user in, contacts another user, or stores data.
+deferred operations use accessible native dialogs. Resource create/update/deactivate
+actions persist; reservation preview actions do not create bookings or invitations.
 
-Resource details include a gallery, specifications, a sample schedule, and a quick
-form that continues to `/reservations/new`. The supplied details apply to Room 4A;
-other sample catalog resources retain their details dialogs. Booking links prefill
-the full form with the selected resource and, when available, its date and times.
+Resource details display saved descriptions, specifications, and operational status.
+All resources support editing and deactivation. The existing Room 4A URL remains
+an alias to its persisted record. Booking previews still use the separate sample
+resource list until reservation management is connected.
 URL-dependent form controls are wrapped in Suspense for production prerendering.
 
 The reservation form updates its summary, checks overlapping sample intervals,

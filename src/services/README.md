@@ -1,7 +1,8 @@
 # Services
 
-Place resource, reservation, and availability business logic here when those
-features are implemented. Future `src/app/api/**/route.ts` Route Handlers should
+`resources.ts` implements persisted resource listing, details, creation, updating,
+and safe deactivation using the existing Prisma client. Reservation and availability
+business logic belong here when implemented. `src/app/api/**/route.ts` Route Handlers should
 validate requests and call these services. Server Components can call server-side
 services directly without making HTTP requests to their own application.
 

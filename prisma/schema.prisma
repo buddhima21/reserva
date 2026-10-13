@@ -1,5 +1,4 @@
-// Initial application schema. No migration has been applied to Supabase yet.
-// Add reservation and profile models when persistent features are implemented.
+// Resource management schema. Reservations and profiles follow in later phases.
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -9,6 +8,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ResourceStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
 model Resource {
   id          String   @id @default(uuid()) @db.Uuid
   name        String
@@ -16,8 +21,13 @@ model Resource {
   category    String
   location    String
   capacity    Int      @default(0)
+  status      ResourceStatus @default(ACTIVE)
+  floor       String?
+  imageUrl    String?
+  slug        String?  @unique
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("resources")
+  @@index([status, category])
 }

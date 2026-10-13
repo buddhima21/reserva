@@ -1,5 +1,9 @@
 # Phase 1: database inspection and proposed schema
 
+Historical inspection: Phase 2 has since implemented the Resource model and
+applied its migration. See [resource management](resource-management.md). Profiles
+and reservations in the proposal below remain unapplied.
+
 This is a proposal, not an applied migration. Inspection performed on October 13,
 2026. No application code, database records, or Supabase-managed tables were changed.
 
