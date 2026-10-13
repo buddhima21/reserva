@@ -1,0 +1,24 @@
+.reserva-landing {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.reserva-landing section[id],
+.reserva-landing footer[id] {
+  scroll-margin-top: 9rem;
+}
+
+.reserva-landing .grid-pattern {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(36, 43, 41, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 43, 41, 0.03) 1px, transparent 1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reserva-landing *,
+  .reserva-landing *::before,
+  .reserva-landing *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
