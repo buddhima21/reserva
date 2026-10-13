@@ -5,5 +5,7 @@ features are implemented. Future `src/app/api/**/route.ts` Route Handlers should
 validate requests and call these services. Server Components can call server-side
 services directly without making HTTP requests to their own application.
 
-No database clients, authentication, or services are implemented yet. Keep database
-access and secrets in server-only modules when Prisma and Supabase are introduced.
+Connection helpers live in `src/lib/prisma.ts` and `src/lib/supabase/`.
+Authentication Route Handlers use Supabase Auth; shared validation and session
+helpers live in `src/lib/auth/`. Business services for persisted reservations are
+not implemented yet. Keep database access and secrets in server-only modules.

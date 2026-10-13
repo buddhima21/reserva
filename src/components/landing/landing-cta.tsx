@@ -16,7 +16,7 @@ export function LandingCta() {
           Take the complexity out of managing shared resources.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-ivory text-forest hover:bg-white text-[15px] font-semibold tracking-tight shadow-md hover:shadow-xl transition-all duration-200 group">
+          <Link href="/signup" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-ivory text-forest hover:bg-white text-[15px] font-semibold tracking-tight shadow-md hover:shadow-xl transition-all duration-200 group">
             <span>Get Started</span>
             <svg aria-hidden="true" className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3" />

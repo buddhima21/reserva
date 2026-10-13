@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { PreviewAction } from "@/components/ui/preview-action";
 import { ReservationList } from "./reservation-list";
 
-export function DashboardOverview() {
+export function DashboardOverview({ name }: { name: string }) {
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-lg mb-space-xl">
@@ -13,7 +13,7 @@ export function DashboardOverview() {
             <span>Sample day: October 24 • HQ – Building 4 (Level 3 East)</span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-ws-primary tracking-tight font-bold flex items-center gap-space-sm">
-            Good morning, Alex
+            Welcome back, {name}
             <span className="inline-block animate-pulse text-ws-secondary text-headline-lg font-normal">✦</span>
           </h1>
           <p className="font-body-md text-body-md text-ws-on-surface-variant mt-1">

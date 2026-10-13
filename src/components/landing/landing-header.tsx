@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function LandingHeader() {
   return (
     <header className="sticky top-0 z-50 bg-ivory/85 backdrop-blur-md border-b border-border-light transition-all">
@@ -22,13 +24,13 @@ export function LandingHeader() {
           <a href="#about" className="hover:text-forest transition-colors duration-150 py-1">About</a>
         </nav>
         <div className="flex items-center gap-5">
-          <span className="text-[14px] font-medium text-charcoal-muted hover:text-forest transition-colors px-2 py-1.5 hidden sm:inline-block" title="Sign in will be available when authentication is added">Sign In <span className="text-[10px]">(soon)</span></span>
-          <a href="#cta" className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-forest hover:bg-forest-light text-ivory text-[13.5px] font-medium tracking-tight shadow-sm hover:shadow transition-all duration-150 group">
+          <Link href="/login" className="text-[14px] font-medium text-charcoal-muted hover:text-forest transition-colors px-2 py-1.5">Sign In</Link>
+          <Link href="/signup" className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-forest hover:bg-forest-light text-ivory text-[13.5px] font-medium tracking-tight shadow-sm hover:shadow transition-all duration-150 group">
             <span>Get Started</span>
             <svg aria-hidden="true" className="w-3.5 h-3.5 ml-1.5 transition-transform duration-150 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
       <details className="lg:hidden border-t border-border-light px-6 py-3">
