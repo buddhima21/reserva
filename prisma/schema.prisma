@@ -1,0 +1,23 @@
+// Initial application schema. No migration has been applied to Supabase yet.
+// Add reservation and profile models when persistent features are implemented.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Resource {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  category    String
+  location    String
+  capacity    Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("resources")
+}

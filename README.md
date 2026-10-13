@@ -10,8 +10,14 @@ layout, a converted landing page, a dashboard, resource details, a reservation f
 and an availability timeline using sample
 data. Routes and static presentation use Server Components; navigation state,
 filters, view switching, and preview dialogs use focused Client Components.
-Authentication, APIs, Prisma, and Supabase PostgreSQL will be added in
-later stages; no credentials or environment variables are required yet.
+Prisma and Supabase connection helpers are configured. Login, immediate signup,
+and sign-out use Supabase Auth through Next.js Route Handlers. Email confirmation
+must be disabled in Supabase; the application does not use confirmation emails.
+Workspace routes require a verified session. Database-backed booking features
+are still pending; reservation screens continue to use sample data.
+
+See [authentication setup](docs/authentication.md) for the required Supabase
+signup configuration and testing steps.
 
 ## Local development
 
@@ -60,6 +66,41 @@ with their component. Future backend endpoints belong in `src/app/api/**/route.t
 Use Server Components by default and introduce small Client Components only when
 interaction requires them. Use the existing `@/*` alias for imports from `src`.
 
+## Database and authentication connection foundation
+
+Copy `.env.example` to `.env` and fill in the values from the Supabase dashboard.
+Use the PostgreSQL session pooler URL (port 5432) as `DATABASE_URL`, replacing
+the password placeholder with your URL-encoded database password. Use the HTTPS
+Project URL and publishable key for the two `NEXT_PUBLIC_SUPABASE_*` values.
+Never put a database password or Supabase secret/service-role key in a public variable.
+The local `.env` file is ignored by Git.
+
+`prisma.config.ts` loads environment variables using the same loader as Next.js.
+`prisma/schema.prisma` contains an initial Resource model for client generation;
+no migration has been applied and no application tables have been created.
+The generated client lives in ignored `src/generated/prisma/` and is regenerated
+on installation, type checking, and production builds.
+
+`src/lib/prisma.ts` provides a lazy, reusable server-only PostgreSQL client.
+`src/lib/supabase/` contains browser/server clients, public configuration validation,
+and cookie-based session refresh. `src/proxy.ts` refreshes existing sessions and
+redirects anonymous workspace visits to login. The workspace layout independently
+verifies the signed-in user before rendering.
+
+```sh
+npm run db:generate
+npm run db:validate
+npm run db:check
+```
+
+The connection check performs a read-only `SELECT 1` through Prisma and calls the
+Supabase Auth settings endpoint to verify the publishable key. It prints no
+credentials. It creates no users, tables, or reservations. PostgreSQL connections
+verify TLS certificates using Supabase's public CA in `certs/supabase-ca.crt`.
+This public certificate contains no private key and is safe to commit. Keep it
+available in deployments. Application-table migrations and reservation ownership
+checks are separate implementation steps.
+
 ## Design foundation
 
 `globals.css` exposes semantic Tailwind colors: `background`, `foreground`,
@@ -72,7 +113,7 @@ The landing page preserves the supplied HTML design, using additional ivory,
 forest, emerald, and charcoal Tailwind tokens, custom shadows, and a Newsreader
 serif font loaded with `next/font`. Its navigation uses native section anchors
 and a mobile disclosure menu. Main calls to action open `/dashboard` through
-Next.js `Link`. Sign in is marked as coming soon. The schedule is an illustrative,
+Next.js `Link`. Sign in and Get Started open the authentication pages. The schedule is an illustrative,
 inert sample preview; its controls do not perform bookings or synchronization.
 
 The dashboard and resource catalog preserve the supplied workspace designs.
@@ -117,11 +158,13 @@ npm run typecheck
 npm run build
 ```
 
-Type checking generates Next.js route types before running TypeScript. The starter's
+Type checking generates Prisma and Next.js route types before running TypeScript. The starter's
 `next/font/google` setup fetches Geist fonts during a fresh build, so internet access
 is needed for that step. Run `npm start` after a successful build to serve production.
 
-Dependencies are unchanged from the starter. The npm audit at initialization reported
-an ESLint development dependency advisory; `npm audit --omit=dev` reported zero
-production vulnerabilities. Recheck audits as dependencies evolve and review proposed
-changes before using `npm audit fix --force`.
+The current npm audit reports nine high-severity entries across the ESLint and
+Prisma tooling dependency chains. `npm audit --omit=dev` still reports four Prisma
+entries because Prisma is also an optional peer of the client. The reported
+transitive advisories concern `braces`, `deepmerge-ts`, and `mysql2`; this project
+uses PostgreSQL rather than MySQL. Review compatible fixes separately:
+`npm audit fix --force` currently proposes breaking version downgrades.
