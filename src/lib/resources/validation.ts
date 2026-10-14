@@ -6,9 +6,36 @@ export class ResourceError extends Error {
   }
 }
 
-export function validateResourceId(value: string) {
+// Prisma driver adapters nest native PostgreSQL constraint errors differently.
+// Inspect internally, but never send their raw messages or metadata to clients.
+export function hasDatabaseConstraint(error: unknown, name: string): boolean {
+  const seen = new Set<object>();
+  function inspect(value: unknown, depth: number): boolean {
+    if (depth > 6) return false;
+    if (typeof value === "string") return value.includes(name);
+    if (!value || typeof value !== "object" || seen.has(value)) return false;
+    seen.add(value);
+    if (value instanceof Error && inspect(value.message, depth + 1)) return true;
+    return Object.values(value).some(item => inspect(item, depth + 1));
+  }
+  return inspect(error, 0);
+}
+
+export function hasDatabaseError(error: unknown, code: string, message: string): boolean {
+  const seen = new Set<object>();
+  function inspect(value: unknown, depth: number): boolean {
+    if (depth > 6 || !value || typeof value !== "object" || seen.has(value)) return false;
+    seen.add(value);
+    const record = value as Record<string, unknown>;
+    if ((record.originalCode === code || record.code === code) && (record.originalMessage === message || record.message === message)) return true;
+    return Object.getOwnPropertyNames(value).filter(key => key !== "stack").some(key => inspect(record[key], depth + 1));
+  }
+  return inspect(error, 0);
+}
+
+export function validateResourceId(value: string, label = "Resource") {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
-    throw new ResourceError(400, "INVALID_ID", "Resource ID must be a valid UUID.");
+    throw new ResourceError(400, "INVALID_ID", `${label} ID must be a valid UUID.`);
   }
 }
 

@@ -21,7 +21,7 @@ export function Features() {
               </div>
               <h3 className="text-xl font-bold text-forest mb-3 tracking-tight">Find Your Space</h3>
               <p className="text-[15px] text-charcoal-muted leading-relaxed">
-                Discover available rooms and equipment in seconds with clear capacity, floor maps, and hardware specs.
+                Find rooms and equipment in seconds with search, category filters, capacity, and location details.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-border-light flex items-center text-xs font-medium text-forest group-hover:text-emerald-dark transition-colors">
@@ -41,7 +41,7 @@ export function Features() {
               </div>
               <h3 className="text-xl font-bold text-forest mb-3 tracking-tight">Book with Confidence</h3>
               <p className="text-[15px] text-charcoal-muted leading-relaxed">
-                Reserve exactly what you need, without scheduling conflicts or ghost bookings, backed by real-time lock verification.
+                Check availability and reserve exactly what you need, with conflict checks that protect shared resources.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-border-light flex items-center text-xs font-medium text-forest group-hover:text-emerald-dark transition-colors">
@@ -61,11 +61,11 @@ export function Features() {
               </div>
               <h3 className="text-xl font-bold text-forest mb-3 tracking-tight">Stay Organized</h3>
               <p className="text-[15px] text-charcoal-muted leading-relaxed">
-                See upcoming reservations and keep everyone in sync across calendar providers, Slack notifications, and direct check-ins.
+                See your upcoming reservations, review booking details, and release a slot when your plans change.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-border-light flex items-center text-xs font-medium text-forest group-hover:text-emerald-dark transition-colors">
-              <span>Two-way calendar sync</span>
+              <span>Booking history &amp; cancellation</span>
               <span className="ml-1.5 transition-transform group-hover:translate-x-1">→</span>
             </div>
           </div>

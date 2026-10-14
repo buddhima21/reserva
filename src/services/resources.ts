@@ -1,6 +1,6 @@
 import "server-only";
 import { getPrisma } from "@/lib/prisma";
-import { ResourceError, validateResourceId, parseResourceQuery } from "@/lib/resources/validation";
+import { ResourceError, validateResourceId, parseResourceQuery, hasDatabaseConstraint, hasDatabaseError } from "@/lib/resources/validation";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import type { ResourceInput, ResourceList, ResourceRecord } from "@/types/resource";
 
@@ -51,6 +51,7 @@ export async function updateResource(id: string, data: Partial<ResourceInput>, d
   validateResourceId(id);
   try { return serializeResource(await db.resource.update({ where: { id }, data })); }
   catch (error) {
+    if (hasDatabaseConstraint(error, "resources_have_active_reservations") || hasDatabaseError(error, "23514", "Resource has active reservations")) throw new ResourceError(409, "RESOURCE_IN_USE", "This resource has upcoming or ongoing reservations. It cannot be made inactive until those bookings are cancelled or completed.");
     if (error && typeof error === "object" && "code" in error && error.code === "P2025") throw new ResourceError(404, "NOT_FOUND", "This resource could not be found.");
     throw error;
   }

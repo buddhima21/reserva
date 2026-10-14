@@ -11,5 +11,5 @@ export async function ResourceCatalog() {
   catch {
     error = "Resource storage is unavailable. Please try again.";
   }
-  return <ResourceExplorer initial={initial} initialError={error} />;
+  return <ResourceExplorer key={JSON.stringify([initial, error])} initial={initial} initialError={error} />;
 }

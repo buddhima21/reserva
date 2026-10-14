@@ -37,8 +37,10 @@ Supabase public certificate, just like the runtime adapter.
 Status is ACTIVE, MAINTENANCE, or INACTIVE. It describes operational readiness, not
 booking availability. Deactivation sets INACTIVE and never deletes the row. All
 statuses remain visible under All Statuses and can be filtered. There is no hard
-delete endpoint. Reservation scheduling, conflicts, and booking persistence remain
-the next phase. Dashboard/availability/reservation screens still use sample data.
+delete endpoint. Phase 3 connects dashboard, availability, and reservations to
+PostgreSQL. Resources with ongoing or future CONFIRMED reservations cannot become
+INACTIVE or MAINTENANCE: a database trigger returns a meaningful HTTP 409. Cancel
+those bookings first. See [reservation behavior and concurrency](../README.md).
 
 ## API
 

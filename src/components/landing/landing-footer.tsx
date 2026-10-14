@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function LandingFooter() {
   return (
     <footer id="about" className="bg-ivory border-t border-border-light py-14">
@@ -20,7 +22,7 @@ export function LandingFooter() {
         <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs text-charcoal-muted">
           <a href="#features" className="hover:text-forest transition-colors">Features</a>
           <a href="#how-it-works" className="hover:text-forest transition-colors">How It Works</a>
-          <span className="hover:text-forest transition-colors" title="Sign in will be available when authentication is added">Sign In <span className="text-[10px]">(soon)</span></span>
+          <Link href="/login" className="hover:text-forest transition-colors">Sign In</Link>
           <span className="text-charcoal-light">Copyright © 2026 RESERVA</span>
         </div>
       </div>

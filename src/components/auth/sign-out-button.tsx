@@ -7,6 +7,7 @@ export function SignOutButton() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function signOut() {
+    if (pending) return;
     setPending(true); setError("");
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });

@@ -3,18 +3,23 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { useWorkspaceFeedback } from "@/components/ui/workspace-feedback";
 
 export function DeactivateResource({ id, name }: { id: string; name: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
+  const { notify, dismiss } = useWorkspaceFeedback();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function deactivate() {
-    setPending(true); setError("");
+    if (pending) return;
+    dismiss(); setPending(true); setError("");
     try {
       const response = await fetch(`/api/resources/${id}`, { method: "DELETE" });
       const result = await response.json();
-      if (!response.ok) { setError(result.error); return; }
+      if (response.status === 401) { router.replace(`/login?next=${encodeURIComponent(`/resources/${id}`)}`); router.refresh(); return; }
+      if (!response.ok) { setError(result.error ?? "Unable to deactivate this resource."); return; }
+      notify("Resource deactivated. You can reactivate it from Edit Resource.");
       dialog.current?.close(); router.refresh();
     } catch { setError("Could not deactivate this resource. Please try again."); }
     finally { setPending(false); }

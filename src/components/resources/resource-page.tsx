@@ -5,6 +5,7 @@ import { getResource, getResourceBySlug } from "@/services/resources";
 import { ResourceDetails } from "./resource-details";
 import { ResourceForm } from "./resource-form";
 import type { ResourceRecord } from "@/types/resource";
+import { WorkspaceError } from "@/components/ui/workspace-feedback";
 
 export async function ResourcePage({ params, edit = false, slug }: { params?: Promise<{ id: string }>; edit?: boolean; slug?: string }) {
   await requireUser();
@@ -16,6 +17,6 @@ export async function ResourcePage({ params, edit = false, slug }: { params?: Pr
   } catch (error) {
     if (error instanceof ResourceError && (error.status === 400 || error.status === 404)) notFound();
   }
-  if (!resource) return <p role="alert" className="rounded-xl bg-white p-6 text-sm text-ws-error">Unable to load this resource. Please refresh and try again.</p>;
+  if (!resource) return <WorkspaceError message="Unable to load this resource. Please try again." />;
   return edit ? <ResourceForm resource={resource} /> : <ResourceDetails resource={resource} />;
 }

@@ -1,4 +1,5 @@
-// Resource management schema. Reservations and profiles follow in later phases.
+// Auth users remain managed by Supabase; reservation userId references auth.users
+// through the custom migration. No duplicate user/profile table is required.
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,6 +15,11 @@ enum ResourceStatus {
   INACTIVE
 }
 
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
 model Resource {
   id          String   @id @default(uuid()) @db.Uuid
   name        String
@@ -27,7 +33,27 @@ model Resource {
   slug        String?  @unique
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  reservations Reservation[]
 
   @@map("resources")
   @@index([status, category])
+}
+
+model Reservation {
+  id          String @id @default(uuid()) @db.Uuid
+  resourceId  String @db.Uuid
+  userId      String @db.Uuid
+  startTime   DateTime @db.Timestamptz(3)
+  endTime     DateTime @db.Timestamptz(3)
+  status      ReservationStatus @default(CONFIRMED)
+  purpose     String
+  notes       String?
+  cancelledAt DateTime? @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+
+  @@index([userId, startTime])
+  @@index([resourceId, startTime])
+  @@map("reservations")
 }
