@@ -1,11 +1,11 @@
 export function ProductPreview() {
   return (
-    <section id="signature-product" className="py-12 md:py-20 relative px-4 sm:px-6">
+    <section id="signature-product" className="landing-product py-12 md:py-20 relative px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <p className="mb-4 text-center text-xs text-charcoal-muted">Illustrative product preview · Sample data</p>
-        <div className="overflow-x-auto rounded-2xl" role="img" aria-label="Product concept: a resource schedule with room availability and a selected reservation slot.">
+        <div data-reveal className="product-frame overflow-x-auto rounded-2xl" role="img" aria-label="Product concept: a resource schedule with room availability and a selected reservation slot.">
           <div inert className="min-w-[760px]">
-            <div className="rounded-2xl border border-border-strong bg-white shadow-browser overflow-hidden transition-all">
+            <div className="product-surface rounded-2xl border border-border-strong bg-white shadow-browser overflow-hidden">
               <div className="px-5 py-3.5 bg-[#F2F4F0] border-b border-border-light flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-[#E5E7EB] inline-block"></span>

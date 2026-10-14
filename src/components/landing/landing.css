@@ -1,5 +1,181 @@
 .reserva-landing {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  isolation: isolate;
+  background: #fafbf8;
+}
+
+.reserva-landing .landing-header {
+  background: rgba(250, 251, 248, 0.88);
+  box-shadow: 0 4px 24px rgba(23, 59, 50, 0.035);
+  backdrop-filter: blur(18px);
+}
+
+.reserva-landing .landing-header nav a {
+  position: relative;
+}
+
+.reserva-landing .landing-header nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: #2e8c6f;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+
+.reserva-landing .landing-header nav a:hover::after,
+.reserva-landing .landing-header nav a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.reserva-landing .landing-hero {
+  background: linear-gradient(180deg, #fafbf8 15%, #f0f6ef 100%);
+  padding-bottom: 5rem;
+}
+
+.reserva-landing .landing-hero h1 {
+  text-wrap: balance;
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+}
+
+.reserva-landing .landing-hero h1 > span {
+  color: #358f73;
+}
+
+.reserva-landing .landing-hero p {
+  text-wrap: pretty;
+}
+
+.reserva-landing .hero-badge {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 16px rgba(23, 59, 50, 0.055), inset 0 1px 0 white;
+}
+
+.reserva-landing .hero-aura {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  width: 32rem;
+  height: 32rem;
+  filter: blur(70px);
+  opacity: 0.32;
+}
+
+.reserva-landing .hero-aura-left {
+  left: -18rem;
+  top: 4rem;
+  background: #a5d9b9;
+}
+
+.reserva-landing .hero-aura-right {
+  right: -20rem;
+  bottom: -18rem;
+  background: #b9d9ad;
+}
+
+.reserva-landing .hero-actions a,
+.reserva-landing #cta a {
+  min-height: 52px;
+  transition: transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.reserva-landing .hero-actions a:first-child {
+  box-shadow: 0 8px 22px rgba(23, 59, 50, 0.19), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.reserva-landing .landing-product {
+  background: linear-gradient(180deg, #f0f6ef, #fafbf8 55%);
+}
+
+.reserva-landing .product-frame {
+  perspective: 1600px;
+  border: 6px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 36px 80px -32px rgba(23, 59, 50, 0.24), 0 0 0 1px rgba(23, 59, 50, 0.08);
+  scrollbar-width: thin;
+  scrollbar-color: #8ebaa5 #edf3ed;
+}
+
+.reserva-landing .product-surface {
+  transform-style: preserve-3d;
+}
+
+.reserva-landing h2 {
+  text-wrap: balance;
+  letter-spacing: -0.04em;
+}
+
+.reserva-landing .landing-feature-card,
+.reserva-landing .landing-step-card {
+  position: relative;
+  box-shadow: 0 4px 18px rgba(23, 59, 50, 0.035);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.reserva-landing .landing-feature-card {
+  background: linear-gradient(145deg, #fafbf8, #f1f6f0);
+}
+
+.reserva-landing .landing-feature-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border: 1px solid #83bca1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.reserva-landing .landing-feature-card h3,
+.reserva-landing .landing-step-card h3 {
+  letter-spacing: -0.025em;
+}
+
+.reserva-landing #how-it-works {
+  background: #f5f7f2;
+}
+
+.reserva-landing #cta {
+  background: #143a30;
+}
+
+.reserva-landing .cta-aura {
+  position: absolute;
+  inset: -50% -20%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 0%, rgba(109, 193, 141, 0.16), transparent 65%);
+}
+
+.reserva-landing footer {
+  background: #fafbf8;
+}
+
+@media (min-width: 768px) {
+  .reserva-landing .landing-hero h1 {
+    font-size: clamp(4.5rem, 6.1vw, 5.5rem);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .reserva-landing .hero-actions a:hover,
+  .reserva-landing #cta a:hover {
+    transform: translateY(-3px);
+  }
+
+  .reserva-landing .landing-feature-card:hover,
+  .reserva-landing .landing-step-card:hover {
+    box-shadow: 0 16px 40px -12px rgba(23, 59, 50, 0.17);
+    border-color: #83bca1;
+  }
+
+  .reserva-landing .landing-feature-card:hover::before {
+    opacity: 1;
+  }
 }
 
 .reserva-landing section[id],

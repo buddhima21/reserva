@@ -7,6 +7,7 @@ import { Features } from "@/components/landing/features";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingCta } from "@/components/landing/landing-cta";
 import { LandingFooter } from "@/components/landing/landing-footer";
+import { LandingMotion } from "@/components/landing/landing-motion";
 import "@/components/landing/landing.css";
 
 const newsreader = Newsreader({
@@ -35,15 +36,17 @@ export default function Home() {
       >
         Skip to content
       </a>
-      <LandingHeader />
-      <main id="landing-content" tabIndex={-1}>
-        <Hero />
-        <ProductPreview />
-        <Features />
-        <HowItWorks />
-        <LandingCta />
-      </main>
-      <LandingFooter />
+      <LandingMotion>
+        <LandingHeader />
+        <main id="landing-content" tabIndex={-1}>
+          <Hero />
+          <ProductPreview />
+          <Features />
+          <HowItWorks />
+          <LandingCta />
+        </main>
+        <LandingFooter />
+      </LandingMotion>
     </div>
   );
 }

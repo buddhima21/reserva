@@ -277,3 +277,16 @@ To check multiple tabs, open the workspace twice, sign out in one tab, then retu
 to the other. Both should show login. Sign in again and switch tabs without clicking
 Sign out; both should stay signed in. Disconnect the network and try signing out:
 an error should appear and the button should allow another attempt.
+
+## Landing page motion
+
+The existing landing page uses GSAP for staggered hero entrances, section reveals,
+and a subtle desktop perspective effect on the original product preview. Its
+layout, content, navigation, and calls to action are preserved. Styling refinements
+are scoped to `.reserva-landing`, including typography, soft background lighting,
+card depth, navigation underlines, and button hover states.
+
+Animations respect `prefers-reduced-motion`, and GSAP contexts are reverted on
+unmount or when the media query changes. The page renders visible content without
+JavaScript. To review, open `/`, scroll through each section, check mobile widths,
+and enable reduced motion in your browser’s rendering settings.

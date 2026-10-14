@@ -2,14 +2,14 @@ export function Features() {
   return (
     <section id="features" className="py-24 md:py-32 bg-white border-y border-border-light relative">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="max-w-3xl mb-16">
+        <div data-reveal className="max-w-3xl mb-16">
           <p className="text-[11.5px] font-bold uppercase tracking-widest text-emerald-dark mb-3">Simpler by Design</p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-forest leading-[1.15]">
             Everything you need.<br/>Nothing you don&apos;t.
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card transition-all duration-200 flex flex-col justify-between">
+          <div data-reveal className="landing-feature-card group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-8">
                 <span className="font-mono text-xs font-semibold tracking-wider text-emerald-dark bg-emerald-surface px-2.5 py-1 rounded-md">01</span>
@@ -29,7 +29,7 @@ export function Features() {
               <span className="ml-1.5 transition-transform group-hover:translate-x-1">→</span>
             </div>
           </div>
-          <div className="group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card transition-all duration-200 flex flex-col justify-between">
+          <div data-reveal className="landing-feature-card group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-8">
                 <span className="font-mono text-xs font-semibold tracking-wider text-emerald-dark bg-emerald-surface px-2.5 py-1 rounded-md">02</span>
@@ -49,7 +49,7 @@ export function Features() {
               <span className="ml-1.5 transition-transform group-hover:translate-x-1">→</span>
             </div>
           </div>
-          <div className="group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card transition-all duration-200 flex flex-col justify-between">
+          <div data-reveal className="landing-feature-card group p-8 rounded-2xl bg-ivory border border-border-light hover:border-border-strong hover:shadow-card flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-8">
                 <span className="font-mono text-xs font-semibold tracking-wider text-emerald-dark bg-emerald-surface px-2.5 py-1 rounded-md">03</span>
