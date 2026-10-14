@@ -122,6 +122,88 @@
 .reserva-workspace button { cursor: pointer; }
 .reserva-workspace dialog::backdrop { background: rgb(0 33 23 / 35%); backdrop-filter: blur(3px); }
 
+/* Shared dashboard surfaces. Motion uses CSS so server-rendered content stays usable. */
+.reserva-workspace { background: #f5f7f5; }
+.workspace-sidebar { box-shadow: 4px 0 24px rgb(0 33 23 / 2%); }
+.workspace-sidebar nav a { transition: background-color 180ms ease, color 180ms ease, transform 180ms ease; }
+.workspace-sidebar nav a[aria-current="page"] { background: #e3f1e9; color: #12372b; box-shadow: inset 3px 0 #267356; }
+.workspace-header { background: rgb(255 255 255 / 94%); }
+.workspace-header-actions { min-width: 0; flex-wrap: wrap; }
+.workspace-user-name { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reserva-workspace .workspace-timezone { background: transparent; border-color: transparent; padding: 0; margin-bottom: 1.5rem; color: #626e66; }
+.dashboard-heading h1 { overflow-wrap: anywhere; }
+.dashboard-heading { padding-top: .25rem; }
+.dashboard-overview { min-width: 0; }
+.dashboard-overview :is(h2, h3, p) { overflow-wrap: anywhere; }
+.dashboard-overview :is(a, button), .dashboard-primary-action { transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
+.dashboard-actions a, .dashboard-primary-action, .dashboard-next-link { min-height: 44px; }
+.dashboard-actions a:first-child, .dashboard-next-link { border: 1px solid #dbe5de; }
+.dashboard-metric { min-width: 0; position: relative; border: 1px solid #dfe7e1; border-radius: 18px; padding: 1.4rem; box-shadow: 0 3px 12px rgb(0 33 23 / 3%); transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease; }
+.dashboard-metric-icon { display: inline-flex; background: #edf4ef; color: #306b53; border-radius: 12px; padding: .65rem; transition: transform 220ms ease; }
+.dashboard-metric-count { font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.055em; }
+.dashboard-metric:nth-child(2) { background: linear-gradient(135deg, #12372b, #204d3d); border-color: #12372b; }
+.dashboard-metric:nth-child(2) :is(h2, p) { color: #e1ece5; }
+.dashboard-metric:nth-child(2) .dashboard-metric-count { color: #fff; }
+.dashboard-metric:nth-child(2) .dashboard-metric-icon { background: rgb(255 255 255 / 12%); color: #b6efd3; }
+.dashboard-panel { min-width: 0; border: 1px solid #dfe7e1; border-radius: 18px; box-shadow: 0 3px 12px rgb(0 33 23 / 3%); }
+.dashboard-reservations { padding: 1.25rem; background: #fff; }
+.dashboard-reservations .dashboard-reservation-row { box-shadow: none; background: #fafcfb; border-color: #e5ece7; }
+.dashboard-reservation-row > div:first-child { min-width: 0; }
+.dashboard-reservations .dashboard-reservation-row a:first-child { overflow-wrap: anywhere; }
+.dashboard-overview [class*="bg-ws-secondary-container"] { background-color: #e1f3e8; color: #1b6345; }
+.dashboard-tip { border: 1px solid #dfe7e1; background: #ebf2ed; border-radius: 18px; }
+.dashboard-next-booking { border: 1px solid #d6e5d9; background: linear-gradient(115deg, #eaf2e9, #f2f7ee); }
+.dashboard-next-icon { display: flex; align-items: center; justify-content: center; width: 3.25rem; height: 3.25rem; flex-shrink: 0; border-radius: 14px; background: white; color: #326f50; box-shadow: 0 3px 12px rgb(0 33 23 / 4%); }
+.dashboard-readiness { position: relative; overflow: hidden; border: 1px solid #244c3c; background: linear-gradient(145deg, #12372b, #1b4939); box-shadow: 0 8px 24px rgb(0 33 23 / 10%); }
+.dashboard-readiness-summary { margin-top: 1.25rem; }
+.dashboard-readiness-track { height: 7px; overflow: hidden; border-radius: 999px; background: rgb(255 255 255 / 15%); margin-top: 1rem; }
+.dashboard-readiness-track span { display: block; height: 100%; border-radius: inherit; background: #a3dfb7; transform-origin: left; }
+.dashboard-category { gap: 1rem; border: 1px solid #dfe7e1; background: #f2f6f3; transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease; }
+.dashboard-admin-row { transition: background-color 180ms ease; }
+.dashboard-admin-row > div { min-width: 0; }
+.dashboard-overview :is(a, button):focus-visible, .workspace-sidebar a:focus-visible, .dashboard-primary-action:focus-visible { outline: 3px solid #397a5b; outline-offset: 4px; }
+
+@keyframes dashboard-enter {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes dashboard-bar-enter {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard-heading { animation: dashboard-enter 450ms ease-out backwards; }
+  .dashboard-metric { animation: dashboard-enter 500ms ease-out backwards; }
+  .dashboard-metric:nth-child(1) { animation-delay: 50ms; }
+  .dashboard-metric:nth-child(2) { animation-delay: 110ms; }
+  .dashboard-metric:nth-child(3) { animation-delay: 170ms; }
+  .dashboard-metric:nth-child(4) { animation-delay: 230ms; }
+  .dashboard-next-booking { animation: dashboard-enter 550ms 180ms ease-out backwards; }
+  .dashboard-content > section, .dashboard-content > aside, .dashboard-content > div { animation: dashboard-enter 550ms 240ms ease-out backwards; }
+  .dashboard-content > aside, .dashboard-content > div { animation-delay: 320ms; }
+  .dashboard-inventory { animation: dashboard-enter 550ms 300ms ease-out backwards; }
+  .dashboard-readiness-track span { animation: dashboard-bar-enter 800ms 400ms cubic-bezier(.22, 1, .36, 1) backwards; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .workspace-sidebar nav a:hover { transform: translateX(2px); }
+  .dashboard-metric:hover { transform: translateY(-4px); border-color: #a9c9b4; box-shadow: 0 12px 28px rgb(0 33 23 / 8%); }
+  .dashboard-metric:hover .dashboard-metric-icon { transform: rotate(-5deg); }
+  .dashboard-actions a:hover, .dashboard-primary-action:hover, .dashboard-next-link:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgb(0 33 23 / 10%); }
+  .dashboard-category:hover { transform: translateY(-3px); border-color: #a9c9b4; background: #eaf3ed; }
+}
+
+@media (max-width: 639px) {
+  .dashboard-metric { padding: 1.15rem; }
+  .dashboard-heading h1 { font-size: 1.75rem; line-height: 1.25; }
+  .workspace-header-actions { gap: .65rem; }
+  .workspace-user-name { max-width: 8rem; }
+  .dashboard-next-booking > div { flex-basis: calc(100% - 5rem); }
+  .dashboard-reservations { padding: 1rem; }
+  .dashboard-reservations .dashboard-reservation-row { padding: 1rem; }
+}
+
 @media (min-width: 1024px) {
   .resource-list-item .resource-card { flex-direction: row; }
   .resource-list-item .resource-card > div:first-child { display: grid; grid-template-columns: minmax(12rem, 18rem) 1fr; flex: 1; min-width: 0; }
@@ -132,4 +214,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .reserva-workspace *, .reserva-workspace *::before, .reserva-workspace *::after { animation: none !important; transition: none !important; }
+  .workspace-sidebar nav a:hover, .dashboard-metric:hover, .dashboard-metric:hover .dashboard-metric-icon,
+  .dashboard-actions a:hover, .dashboard-primary-action:hover, .dashboard-next-link:hover, .dashboard-category:hover { transform: none; }
 }

@@ -5,6 +5,7 @@ import { isSameOrigin } from "@/lib/auth/http";
 import { ResourceError } from "./validation";
 import { revalidatePath } from "next/cache";
 import { assertAdminUser } from "@/services/admin-access";
+export { resourceBody } from "./request-body";
 
 export function resourceResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
@@ -21,12 +22,6 @@ export async function authorizeAdminRequest(request: Request, mutation = false) 
   const user = await authorizeResourceRequest(request, mutation);
   await assertAdminUser(user.id);
   return user;
-}
-
-export async function resourceBody(request: Request) {
-  if (!request.headers.get("content-type")?.includes("application/json")) throw new ResourceError(415, "UNSUPPORTED_MEDIA_TYPE", "Send request data as application/json.");
-  try { return await request.json(); }
-  catch { throw new ResourceError(400, "INVALID_JSON", "The request body contains invalid JSON."); }
 }
 
 export function resourceFailure(error: unknown) {

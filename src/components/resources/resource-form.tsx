@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { categoryLabels, resourceCategories, resourceStatuses, statusLabels, type ResourceRecord } from "@/types/resource";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspaceFeedback } from "@/components/ui/workspace-feedback";
+import { ResourceImageInput } from "./resource-image-input";
 
 const inputClass = "mt-2 w-full rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-low px-3 py-2.5 text-sm text-ws-on-surface";
 
@@ -15,16 +16,21 @@ export function ResourceForm({ resource, admin = false }: { resource?: ResourceR
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState(resource?.imageUrl ?? "");
   const cancelHref = admin ? "/admin/resources" : resource ? `/resources/${resource.id}` : "/resources";
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
     const form = new FormData(event.currentTarget);
+    form.delete("imageSource");
+    form.set("imageUrl", imageFile ? "" : imageUrl);
     const data = { ...Object.fromEntries(form), capacity: Number(form.get("capacity")) };
     dismiss(); setPending(true); setError(""); setFields({});
     try {
-      const response = await fetch(resource ? `/api/resources/${resource.id}` : "/api/resources", { method: resource ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (imageFile) { form.delete("imageUrl"); form.set("image", imageFile); }
+      const response = await fetch(resource ? `/api/resources/${resource.id}` : "/api/resources", { method: resource ? "PATCH" : "POST", ...(imageFile ? { body: form } : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }) });
       const result = await response.json();
       if (response.status === 401) { router.replace(`/login?next=${encodeURIComponent(resource ? `/resources/${resource.id}/edit` : "/resources/new")}`); router.refresh(); return; }
       if (!response.ok) { setError(result.error ?? "Unable to save this resource."); setFields(result.fields ?? {}); return; }
@@ -52,9 +58,9 @@ export function ResourceForm({ resource, admin = false }: { resource?: ResourceR
         <label className="text-sm font-medium" htmlFor="resource-floor">Floor<input id="resource-floor" name="floor" maxLength={30} defaultValue={resource?.floor ?? ""} placeholder="4 or ground" className={inputClass} {...accessibility("floor")} />{fieldError("floor")}</label>
         <label className="text-sm font-medium" htmlFor="resource-capacity">Capacity<input id="resource-capacity" name="capacity" type="number" min={0} max={10000} step={1} required defaultValue={resource?.capacity ?? 0} className={inputClass} {...accessibility("capacity")} /><span className="mt-1 block text-xs font-normal text-ws-outline">Use 0 for equipment.</span>{fieldError("capacity")}</label>
         <label className="text-sm font-medium sm:col-span-2" htmlFor="resource-description">Description<textarea id="resource-description" name="description" rows={4} maxLength={2000} defaultValue={resource?.description ?? ""} className={inputClass} {...accessibility("description")} />{fieldError("description")}</label>
-        <label className="text-sm font-medium sm:col-span-2" htmlFor="resource-image">Image URL<input id="resource-image" name="imageUrl" type="url" maxLength={2048} defaultValue={resource?.imageUrl ?? ""} placeholder="https://…" className={inputClass} {...accessibility("imageUrl")} /><span className="mt-1 block text-xs font-normal text-ws-outline">Optional HTTPS image link. A resource icon is shown when omitted.</span>{fieldError("imageUrl")}</label>
+        <ResourceImageInput imageUrl={imageUrl} onUrlChange={setImageUrl} file={imageFile} onFileChange={setImageFile} error={fields.image ?? fields.imageUrl} onError={message => setFields(current => ({ ...current, image: message, imageUrl: "" }))} />
       </fieldset>
-      <div className="mt-7 flex items-center justify-between gap-3 border-t border-ws-outline-variant/30 pt-5"><Link href={cancelHref} className="rounded-lg px-4 py-2 text-sm text-ws-on-surface-variant">Cancel</Link><button disabled={pending} type="submit" className="inline-flex items-center gap-2 rounded-lg bg-ws-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-ws-primary-container disabled:opacity-60"><Icon name="check_circle" />{pending ? "Saving…" : resource ? "Save Changes" : "Create Resource"}</button></div>
+      <div className="mt-7 flex items-center justify-between gap-3 border-t border-ws-outline-variant/30 pt-5"><Link href={cancelHref} className="rounded-lg px-4 py-2 text-sm text-ws-on-surface-variant">Cancel</Link><button disabled={pending} type="submit" className="inline-flex items-center gap-2 rounded-lg bg-ws-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-ws-primary-container disabled:opacity-60"><Icon name="check_circle" />{pending ? imageFile ? "Uploading & saving…" : "Saving…" : resource ? "Save Changes" : "Create Resource"}</button></div>
     </form>
   </div>;
 }

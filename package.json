@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
-    "test": "node --conditions=react-server --import tsx --test tests/auth.test.ts tests/resources.test.ts tests/reservations.test.ts tests/admin.test.ts tests/settings.test.ts tests/logout.test.ts",
+    "test": "node --conditions=react-server --import tsx --test tests/auth.test.ts tests/resources.test.ts tests/resource-images.test.ts tests/reservations.test.ts tests/admin.test.ts tests/settings.test.ts tests/logout.test.ts",
     "test:resources": "node --conditions=react-server --import tsx tests/resources.integration.ts",
     "test:reservations": "node --conditions=react-server --import tsx tests/reservations.integration.ts",
     "test:admin": "node --conditions=react-server --import tsx tests/admin.integration.ts",
@@ -34,7 +34,8 @@
     "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

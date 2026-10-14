@@ -7,6 +7,7 @@ Next.js App Router, TypeScript, Tailwind CSS, Prisma, Supabase PostgreSQL and Au
 
 - Login, immediate signup without confirmation emails, and sign-out.
 - Resource CRUD with safe deactivation, search, filters, and pagination.
+- Resource images from a device upload with a preview, or an existing HTTPS URL.
 - Persisted reservations, personal history, details, and cancellation.
 - Live resource availability and dashboard counts from PostgreSQL.
 - Concurrent booking protection enforced by PostgreSQL.
@@ -72,6 +73,15 @@ availability reveals occupied times without identities, purposes, or notes.
 Only administrators can create, edit, deactivate, or delete shared resources.
 Members can browse resources and manage their own bookings. Resources with ongoing
 or future confirmed bookings cannot be deactivated or put under maintenance.
+
+Admins can select a JPG, PNG, or WebP image (up to 4 MB and 25 megapixels) when
+creating or editing a resource. The server validates and optimizes uploads to
+WebP, then saves them in the Supabase `resource-images` bucket. Run `npm run
+db:migrate` to create the bucket and admin-only upload/cleanup policies. This uses
+the signed-in admin's session; no service-role key is needed. Resource photos in
+this bucket are public. Existing image URLs continue to work. Uploads happen only
+on save, and a failed resource save removes its new upload. Replacing an image
+keeps the previous object, since another resource may reference its URL.
 
 Availability is a snapshot. Creation rechecks inside a transaction, locks the
 resource row, and inserts under the `reservations_no_overlap` GiST exclusion

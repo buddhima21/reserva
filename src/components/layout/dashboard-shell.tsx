@@ -12,7 +12,7 @@ export function DashboardShell({ children, name, admin = false }: { children: Re
   return (
     <WorkspaceAccess admin={admin}><WorkspaceFeedback><SessionSync /><div className="reserva-workspace min-h-screen font-sans">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3">Skip to content</a>
-      <aside className="border-b border-ws-outline-variant/40 bg-ws-surface-container-lowest lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col lg:justify-between lg:border-r lg:border-b-0">
+      <aside className="workspace-sidebar border-b border-ws-outline-variant/40 bg-ws-surface-container-lowest lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col lg:justify-between lg:border-r lg:border-b-0">
         <div>
           <Link href="/" className="flex h-16 items-center gap-2 border-b border-ws-outline-variant/30 px-5">
             <span className="grid h-8 w-8 grid-cols-2 gap-1 rounded-lg bg-ws-primary p-1.5" aria-hidden="true"><span className="rounded-sm bg-white" /><span className="rounded-sm bg-ws-secondary-fixed" /><span className="rounded-sm bg-ws-secondary-fixed" /><span className="rounded-sm bg-white" /></span>
@@ -27,12 +27,12 @@ export function DashboardShell({ children, name, admin = false }: { children: Re
         </div>
       </aside>
       <div className="lg:pl-[260px]">
-        <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-ws-outline-variant/30 bg-ws-surface-container-lowest/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:sticky lg:top-0 lg:z-30 lg:px-8">
-          <div className="flex items-center gap-3 text-sm text-ws-on-surface-variant"><span>Workspace</span><Icon name="chevron_right" /><span className="font-medium text-ws-on-surface">Operations</span><Link href="/resources" className="ml-2 hidden items-center gap-2 rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-low px-3 py-2 text-xs sm:flex"><Icon name="search" className="text-lg" />Search resources</Link></div>
-          <div className="flex items-center gap-3"><span className="rounded-full bg-ws-surface-container-low px-3 py-1 text-xs font-medium text-ws-on-surface-variant">{name}</span><SignOutButton /><Link href="/reservations?status=upcoming" aria-label="Your upcoming reservations" className="flex rounded-lg p-1 text-xl text-ws-on-surface-variant"><Icon name="event_upcoming" /></Link><HelpDialog title="Help and documentation" aria-label="Help and documentation" message="Manage shared inventory in Resources. Create and cancel your bookings in Reservations, or check the live resource timeline in Availability." className="flex rounded-lg p-1 text-xl text-ws-on-surface-variant"><Icon name="help" /></HelpDialog></div>
+        <header className="workspace-header flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-ws-outline-variant/30 bg-ws-surface-container-lowest/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:sticky lg:top-0 lg:z-30 lg:px-8">
+          <div className="flex items-center gap-3 text-sm text-ws-on-surface-variant"><span>Workspace</span><Icon name="chevron_right" /><span className="font-medium text-ws-on-surface">{admin ? "Administration" : "Overview"}</span><Link href="/resources" className="ml-2 hidden items-center gap-2 rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-low px-3 py-2 text-xs sm:flex"><Icon name="search" className="text-lg" />Search resources</Link></div>
+          <div className="workspace-header-actions flex items-center gap-3"><span className="workspace-user-name rounded-full bg-ws-surface-container-low px-3 py-1 text-xs font-medium text-ws-on-surface-variant">{name}</span><SignOutButton /><Link href="/reservations?status=upcoming" aria-label="Your upcoming reservations" className="flex rounded-lg p-1 text-xl text-ws-on-surface-variant"><Icon name="event_upcoming" /></Link><HelpDialog title="Help and documentation" aria-label="Help and documentation" message="Manage shared inventory in Resources. Create and cancel your bookings in Reservations, or check the live resource timeline in Availability." className="flex rounded-lg p-1 text-xl text-ws-on-surface-variant"><Icon name="help" /></HelpDialog></div>
         </header>
         <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
-          <p className="mb-5 rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-lowest px-4 py-2 text-xs text-ws-on-surface-variant">All reservation times are shown in Asia/Colombo.</p>
+          <p className="workspace-timezone mb-5 rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-lowest px-4 py-2 text-xs text-ws-on-surface-variant">All reservation times are shown in Asia/Colombo.</p>
           <WorkspaceNotice />
           {children}
         </main>

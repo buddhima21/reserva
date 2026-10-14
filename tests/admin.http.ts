@@ -53,6 +53,12 @@ async function main() {
         assert.equal((await blocked.json()).code, "INVALID_ORIGIN");
       }
     }
+    for (const [pathname, method] of [["/api/resources", "POST"], [`/api/resources/${id}`, "PATCH"]]) {
+      const form = new FormData();
+      form.set("image", new File(["fake image"], "room.png", { type: "image/png" }));
+      const response = await fetch(base + pathname, { method, headers: { origin: base }, body: form });
+      assert.equal(response.status, 401, "Uploads must authorize before processing files");
+    }
     const logout = await fetch(`${base}/api/auth/logout`, { method: "POST", headers: { origin: base } });
     assert.equal(logout.status, 200, "Signing out with no existing session is safe and repeatable");
     assert.equal((await logout.json()).redirect, "/login");

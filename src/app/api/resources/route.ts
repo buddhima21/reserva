@@ -1,5 +1,5 @@
-import { authorizeResourceRequest, authorizeAdminRequest, resourceBody, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
-import { parseResourceInput } from "@/lib/resources/validation";
+import { authorizeResourceRequest, authorizeAdminRequest, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
+import { saveResourceSubmission } from "@/lib/resources/image-upload";
 import { createResource, listResources } from "@/services/resources";
 import type { ResourceInput } from "@/types/resource";
 
@@ -12,8 +12,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await authorizeAdminRequest(request, true);
-    const resource = await createResource(parseResourceInput(await resourceBody(request)) as ResourceInput);
+    const user = await authorizeAdminRequest(request, true);
+    const resource = await saveResourceSubmission(request, user.id, false, input => createResource(input as ResourceInput));
     refreshResourcePages(resource.id);
     return resourceResponse({ resource }, 201);
   } catch (error) { return resourceFailure(error); }

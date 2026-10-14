@@ -1,5 +1,6 @@
-import { authorizeResourceRequest, authorizeAdminRequest, resourceBody, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
-import { parseResourceInput } from "@/lib/resources/validation";
+import { authorizeResourceRequest, authorizeAdminRequest, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
+import { saveResourceSubmission } from "@/lib/resources/image-upload";
+import { validateResourceId } from "@/lib/resources/validation";
 import { getResource, updateResource, deactivateResource } from "@/services/resources";
 
 export async function GET(request: Request, context: RouteContext<"/api/resources/[id]">) {
@@ -11,9 +12,10 @@ export async function GET(request: Request, context: RouteContext<"/api/resource
 
 export async function PATCH(request: Request, context: RouteContext<"/api/resources/[id]">) {
   try {
-    await authorizeAdminRequest(request, true);
+    const user = await authorizeAdminRequest(request, true);
     const { id } = await context.params;
-    const resource = await updateResource(id, parseResourceInput(await resourceBody(request), true));
+    validateResourceId(id);
+    const resource = await saveResourceSubmission(request, user.id, true, input => updateResource(id, input));
     refreshResourcePages(id);
     return resourceResponse({ resource });
   } catch (error) { return resourceFailure(error); }
