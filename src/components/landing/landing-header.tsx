@@ -3,6 +3,7 @@ import Link from "next/link";
 export function LandingHeader() {
   return (
     <header className="landing-header sticky top-0 z-50 bg-ivory/85 backdrop-blur-md border-b border-border-light transition-all">
+      <div aria-hidden="true" className="landing-reading-progress" />
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-subtle rounded-lg py-1">
           <div className="w-8 h-8 rounded-lg bg-forest flex items-center justify-center text-emerald-surface shadow-sm transition-transform duration-200 group-hover:scale-105">

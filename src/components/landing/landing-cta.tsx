@@ -4,6 +4,7 @@ export function LandingCta() {
   return (
     <section id="cta" className="py-24 md:py-32 bg-forest text-ivory relative overflow-hidden">
       <div aria-hidden="true" className="cta-aura" />
+      <div aria-hidden="true" className="cta-rings"><span /><span /></div>
       <div className="absolute inset-0 bg-[radial-gradient(#1F4D41_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
       <div data-reveal className="max-w-4xl mx-auto px-6 text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest-light text-emerald-surface text-xs font-medium mb-8 border border-white/10">

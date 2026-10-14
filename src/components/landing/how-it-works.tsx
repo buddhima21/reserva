@@ -7,7 +7,7 @@ export function HowItWorks() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-forest">Effortless coordination in 3 steps</h2>
         </div>
         <div className="relative">
-          <div className="hidden md:block absolute top-1/2 left-24 right-24 h-[1px] bg-border-strong -translate-y-8 z-0"></div>
+          <div className="workflow-connector hidden md:block absolute top-1/2 left-24 right-24 h-[1px] bg-border-strong -translate-y-8 z-0"></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
             <div data-reveal className="landing-step-card bg-white p-8 rounded-2xl border border-border-light text-center shadow-subtle hover:border-border-strong">
               <div className="w-14 h-14 mx-auto rounded-full bg-emerald-surface text-forest flex items-center justify-center font-bold text-sm mb-6 border border-emerald-subtle/30 shadow-xs">

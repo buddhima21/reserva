@@ -280,13 +280,15 @@ an error should appear and the button should allow another attempt.
 
 ## Landing page motion
 
-The existing landing page uses GSAP for staggered hero entrances, section reveals,
-and a subtle desktop perspective effect on the original product preview. Its
+The existing landing page uses GSAP for a line-by-line headline entrance, a drawn
+underline, staggered section/card reveals, a reading-progress line, a workflow
+connector reveal, and a subtle desktop perspective effect on the product preview. Its
 layout, content, navigation, and calls to action are preserved. Styling refinements
 are scoped to `.reserva-landing`, including typography, soft background lighting,
-card depth, navigation underlines, and button hover states.
+card depth, a contrasting middle feature card, navigation underlines, button shine,
+and pointer-following card lighting on devices with a precise pointer.
 
 Animations respect `prefers-reduced-motion`, and GSAP contexts are reverted on
-unmount or when the media query changes. The page renders visible content without
+unmount or when the media query changes; pointer listeners are also removed. The page renders visible content without
 JavaScript. To review, open `/`, scroll through each section, check mobile widths,
 and enable reduced motion in your browser’s rendering settings.
