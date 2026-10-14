@@ -53,7 +53,13 @@ async function main() {
         assert.equal((await blocked.json()).code, "INVALID_ORIGIN");
       }
     }
-    console.log("HTTP checks passed: protected admin redirects, unauthenticated APIs, and same-origin mutation protection.");
+    const logout = await fetch(`${base}/api/auth/logout`, { method: "POST", headers: { origin: base } });
+    assert.equal(logout.status, 200, "Signing out with no existing session is safe and repeatable");
+    assert.equal((await logout.json()).redirect, "/login");
+    assert.match(logout.headers.get("cache-control")!, /no-store/);
+    const blockedLogout = await fetch(`${base}/api/auth/logout`, { method: "POST", headers: { origin: "https://other.example" } });
+    assert.equal(blockedLogout.status, 403);
+    console.log("HTTP checks passed: protected redirects, unauthenticated APIs, same-origin mutations, and repeatable logout.");
   } finally {
     const stopped = server.exitCode !== null || server.signalCode !== null;
     if (!stopped) { const exited = once(server, "exit"); server.kill(); await exited; }

@@ -265,3 +265,15 @@ the session; use Sign out to end this browser’s session.
 `npm test` includes account validation, profile field restrictions, current
 password verification, account matching, and provider error tests.
 `npm run test:http` checks Settings redirects and API authentication/origin guards.
+
+Sign-out redirects with a full page navigation after the server responds, clearing
+the current tab’s cached authenticated view. A notification also redirects other
+open workspace tabs to login; switching tabs without signing out keeps the session.
+Restoring a workspace page from browser history reloads it to verify its cookies.
+Logout requests have a 10-second server deadline and a 15-second browser timeout;
+failures show an error and re-enable the button instead of staying on “Signing out…”.
+
+To check multiple tabs, open the workspace twice, sign out in one tab, then return
+to the other. Both should show login. Sign in again and switch tabs without clicking
+Sign out; both should stay signed in. Disconnect the network and try signing out:
+an error should appear and the button should allow another attempt.
