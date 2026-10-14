@@ -3,21 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "prisma generate",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
-    "test": "node --conditions=react-server --import tsx --test tests/auth.test.ts tests/resources.test.ts tests/reservations.test.ts",
+    "test": "node --conditions=react-server --import tsx --test tests/auth.test.ts tests/resources.test.ts tests/reservations.test.ts tests/admin.test.ts tests/settings.test.ts tests/logout.test.ts",
     "test:resources": "node --conditions=react-server --import tsx tests/resources.integration.ts",
     "test:reservations": "node --conditions=react-server --import tsx tests/reservations.integration.ts",
-    "test:integration": "npm run test:resources && npm run test:reservations",
+    "test:admin": "node --conditions=react-server --import tsx tests/admin.integration.ts",
+    "test:http": "node --import tsx tests/admin.http.ts",
+    "test:integration": "npm run test:resources && npm run test:reservations && npm run test:admin",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:check": "tsx scripts/check-connections.ts",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "node --conditions=react-server --import tsx scripts/seed-resources.ts"
+    "db:seed": "node --conditions=react-server --import tsx scripts/seed-resources.ts",
+    "admin:access": "node --conditions=react-server --import tsx scripts/admin-access.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

@@ -45,3 +45,6 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: HTTP access checks
+        run: npm run test:http

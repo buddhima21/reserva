@@ -10,6 +10,8 @@ Next.js App Router, TypeScript, Tailwind CSS, Prisma, Supabase PostgreSQL and Au
 - Persisted reservations, personal history, details, and cancellation.
 - Live resource availability and dashboard counts from PostgreSQL.
 - Concurrent booking protection enforced by PostgreSQL.
+- Protected administrator workspace with platform statistics, resource CRUD,
+  operational status controls, and reservation management across all members.
 
 The supplied landing and workspace designs are preserved. Server Components load
 data; focused Client Components handle forms, dialogs, and timeline selection.
@@ -67,7 +69,8 @@ cancellation preserves the original cancellation timestamp.
 Every API verifies Supabase Auth. Ownership comes from the session and cannot be
 submitted by clients. Users see/cancel only their own reservations. Shared
 availability reveals occupied times without identities, purposes, or notes.
-All signed-in members currently manage shared resources. Resources with ongoing
+Only administrators can create, edit, deactivate, or delete shared resources.
+Members can browse resources and manage their own bookings. Resources with ongoing
 or future confirmed bookings cannot be deactivated or put under maintenance.
 
 Availability is a snapshot. Creation rechecks inside a transaction, locks the
@@ -128,9 +131,10 @@ npm run typecheck
 npm run build
 npm test
 npm run test:integration
+npm run test:http
 ```
 
-Run `npm run test:resources` or `npm run test:reservations` to isolate a database
+Run `npm run test:resources`, `npm run test:reservations`, or `npm run test:admin` to isolate a database
 suite. `npm test` needs no database. Run `npm run db:check` first if integration
 checks fail during setup; it verifies database and Auth connectivity without
 printing credentials. Integration failures report a stage and error code.
@@ -142,9 +146,14 @@ their generated IDs. They test ownership, cancellation, adjacency, availability,
 concurrent service requests, maintenance/inactive resource protection, retained
 cancelled history, and independent raw database writes. Resource CRUD runs inside
 a rolled-back transaction, allowing up to ten seconds to acquire a connection
-to the hosted database.
+to the hosted database. Admin integration checks require an existing admin grant
+and a second Auth account; they test role rejection, cross-owner management,
+statistics, cancellation, and deletion with history protection. `test:http`
+requires a completed build, starts its own temporary localhost server, checks
+anonymous redirects/API rejection and origin protection, then stops the server.
 
-Manual assessment checks (`npm run dev`, then sign in):
+Manual assessment checks (`npm run dev`, then sign in as an administrator for
+resource management):
 
 1. Create a temporary resource at `/resources/new`. Find it in the catalog, open
    its details, edit its name/capacity, and reload to verify persistence.
@@ -160,6 +169,12 @@ Manual assessment checks (`npm run dev`, then sign in):
    is free, then book the released slot again. With a second account, verify the
    first account's reservation details cannot be viewed or cancelled.
 
+Members must receive HTTP 403 when attempting resource mutations or any admin
+API. Opening `/admin` as a member redirects to the member dashboard. Sign in as
+an admin, open **Administration**, and verify all members' bookings are visible;
+cancel another member's future booking and verify it is cancelled in that
+member's history. Confirm only admins see inventory management actions.
+
 The automated integration suites exercise services and database constraints.
 The manual checklist covers the browser forms and feedback as well.
 
@@ -167,7 +182,7 @@ The manual checklist covers the browser forms and feedback as well.
 
 [CI workflow](.github/workflows/ci.yml) runs on every push to `main`. It installs
 locked dependencies with `npm ci` on Node.js 24, then runs lint, type-checking,
-unit tests, and the production build. Any failed step marks the run as failed.
+unit tests, the production build, and HTTP access checks. Any failed step marks the run as failed.
 It uses build-only placeholder settings and requires no repository secrets.
 Database integration tests are separate: they require a configured database
 with migrations applied and at least one existing Supabase Auth user.
@@ -177,3 +192,76 @@ and their test files. Open the repository's **Actions** tab and select **CI** to
 view results. Once the workflow is on the default branch, **Run workflow** can
 also trigger it manually. This workflow checks the project; deployment is not
 configured.
+
+## Administrator access
+
+Admins sign in through the existing login page. With no explicit destination,
+admin login opens `/admin`. The sidebar includes admin overview, resources, and
+all reservations. The overview shows resources by status/category, availability
+now, today's confirmed bookings, ongoing/upcoming bookings, and reservation
+history counts. Refresh retrieves current statistics from PostgreSQL.
+
+Apply migrations, register the intended account normally, then grant its role
+from a trusted server terminal using the configured database connection:
+
+```sh
+npm run db:migrate
+npm run admin:access -- grant buddhima@gmail.com
+```
+
+The requested account has been granted admin access in the configured database.
+Its existing password remains unchanged. For another environment, run the command
+after that account exists there. To revoke access:
+
+```sh
+npm run admin:access -- revoke buddhima@gmail.com
+```
+
+Roles live in the protected `public.admins` table, linked to `auth.users`. Signup
+never grants a role; user-editable metadata and request fields cannot grant admin
+access. No admin role-management endpoint is exposed. Pages and APIs independently
+verify the session and grant; role changes take effect on the next request.
+
+Admin resource management lives at `/admin/resources`. Create/edit uses the
+existing validated resource API. Availability controls set ACTIVE, INACTIVE, or
+MAINTENANCE; they cannot disable a resource with ongoing/future confirmed bookings.
+Cancel those bookings first. Permanent deletion at `DELETE /api/admin/resources/[id]`
+is allowed only without any reservation history; otherwise HTTP 409 preserves it.
+The older `DELETE /api/resources/[id]` remains safe deactivation.
+
+`/admin/reservations` supports search, status filters, pagination, owner names,
+email addresses, and full booking details. Admins can cancel any upcoming or
+ongoing booking via `DELETE /api/admin/reservations/[id]`; completed bookings remain
+immutable and repeated cancellations preserve the first cancellation timestamp.
+Ordinary reservation endpoints retain owner scoping, including for admins.
+Admin responses use private/no-store headers and mutations require the same origin.
+`GET /api/admin/statistics` exposes the overview counts to admins only.
+
+`npm run dev` regenerates the Prisma client before starting Next.js. When models
+are added during development, the singleton replaces an older cached client that
+lacks the required model delegates. If a dev server still has stale generated
+modules, stop it with Ctrl+C and restart `npm run dev`.
+
+## Account settings
+
+Open Settings in the workspace sidebar or visit `/settings`. Both members and
+admins can edit their display name and change their own password. The page also
+shows their sign-in email, persisted workspace role, membership date, timezone,
+and a sign-out control. Email and role are displayed without editing controls.
+
+`PATCH /api/settings/account` verifies the authenticated user and same origin.
+Profile changes accept only the display name. Password changes require matching
+new passwords of 8–128 characters and verify the current password against the
+same account in a separate temporary session, which is revoked after the check.
+Existing browser session cookies are not replaced by password verification.
+
+To test: save a new name and reload; confirm it appears in the workspace header.
+Try mismatching new passwords and an incorrect current password; both must be
+rejected. With a test account, change the password, sign out, and sign back in
+with the new password. While signed out, `/settings` redirects to login and the
+settings API returns 401. Cross-origin updates return 403. Closing a tab keeps
+the session; use Sign out to end this browser’s session.
+
+`npm test` includes account validation, profile field restrictions, current
+password verification, account matching, and provider error tests.
+`npm run test:http` checks Settings redirects and API authentication/origin guards.

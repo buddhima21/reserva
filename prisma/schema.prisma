@@ -9,6 +9,14 @@ datasource db {
   provider = "postgresql"
 }
 
+// Granted only through the server-side provisioning script.
+model Admin {
+  userId    String   @id @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("admins")
+}
+
 enum ResourceStatus {
   ACTIVE
   MAINTENANCE

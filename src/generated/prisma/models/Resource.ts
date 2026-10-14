@@ -515,10 +515,6 @@ export type ResourceScalarRelationFilter = {
   isNot?: Prisma.ResourceWhereInput
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -533,10 +529,6 @@ export type IntFieldUpdateOperationsInput = {
 
 export type EnumResourceStatusFieldUpdateOperationsInput = {
   set?: $Enums.ResourceStatus
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type ResourceCreateNestedOneWithoutReservationsInput = {

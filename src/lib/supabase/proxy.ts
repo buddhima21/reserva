@@ -4,7 +4,7 @@ import { getSupabaseConfig } from "./config";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const protectedRoute = ["/dashboard", "/resources", "/reservations", "/availability"].some(path => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
+  const protectedRoute = ["/dashboard", "/resources", "/reservations", "/availability", "/admin", "/settings"].some(path => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
   function signInRedirect() {
     const url = new URL("/login", request.url);
     url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);

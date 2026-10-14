@@ -4,6 +4,7 @@ import { ResourceError, validateResourceId, hasDatabaseConstraint, hasDatabaseEr
 import { serializeResource } from "@/services/resources";
 import { localDayRange, type ReservationInput, type ReservationRecord, type ReservationListData, type DayAvailability } from "@/lib/reservations";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
+import { assertAdminUser } from "./admin-access";
 
 type Database = Pick<PrismaClient, "resource" | "reservation">;
 type StoredReservation = Prisma.ReservationGetPayload<{ include: { resource: true } }>;
@@ -33,22 +34,39 @@ export async function createReservation(userId: string, data: ReservationInput, 
 }
 
 export async function getReservation(userId: string, id: string, db: Database = getPrisma()) {
+  validateResourceId(userId, "User");
+  return getScopedReservation(userId, id, db);
+}
+
+async function getScopedReservation(userId: string | null, id: string, db: Database) {
   validateResourceId(id, "Reservation");
-  const row = await db.reservation.findFirst({ where: { id, userId }, include });
+  const row = await db.reservation.findFirst({ where: { id, ...(userId === null ? {} : { userId }) }, include });
   if (!row) throw new ResourceError(404, "NOT_FOUND", "This reservation could not be found.");
   return serialize(row);
 }
 
 export async function listReservations(userId: string, params = new URLSearchParams(), db: Database = getPrisma()): Promise<ReservationListData> {
+  validateResourceId(userId, "User");
+  return listScopedReservations(userId, params, db);
+}
+
+async function listScopedReservations(userId: string | null, params: URLSearchParams, db: Database): Promise<ReservationListData> {
   const status = params.get("status") ?? "all";
   const page = Number(params.get("page") ?? 1);
   const pageSize = Number(params.get("pageSize") ?? 12);
-  if (!["all", "upcoming", "completed", "CANCELLED"].includes(status) || !Number.isInteger(page) || page < 1 || page > 100000 || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new ResourceError(400, "INVALID_FILTER", "Choose a valid reservation filter and pagination values.");
-  const where: Prisma.ReservationWhereInput = { userId };
+  if (!["all", "upcoming", "ongoing", "completed", "CANCELLED"].includes(status) || !Number.isInteger(page) || page < 1 || page > 100000 || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new ResourceError(400, "INVALID_FILTER", "Choose a valid reservation filter and pagination values.");
+  const where: Prisma.ReservationWhereInput = userId === null ? {} : { userId };
+  if (params.has("resourceId")) { validateResourceId(params.get("resourceId")!); where.resourceId = params.get("resourceId")!; }
+  const query = params.get("q")?.trim();
+  if (query && (query.length > 120 || query.includes("\0"))) throw new ResourceError(400, "INVALID_FILTER", "Search must contain at most 120 characters.");
+  if (query) where.OR = [{ purpose: { contains: query, mode: "insensitive" } }, { resource: { name: { contains: query, mode: "insensitive" } } }];
   if (status === "CANCELLED") where.status = "CANCELLED";
+  if (status === "ongoing") { where.status = "CONFIRMED"; const now = new Date(); where.startTime = { lte: now }; where.endTime = { gt: now }; }
   if (status === "upcoming" || status === "completed") {
     where.status = "CONFIRMED";
-    where.endTime = status === "upcoming" ? { gt: new Date() } : { lte: new Date() };
+    const now = new Date();
+    where.endTime = status === "upcoming" ? { gt: now } : { lte: now };
+    if (status === "upcoming" && userId === null) where.startTime = { gt: now };
   }
   const [items, total] = await Promise.all([
     db.reservation.findMany({ where, include, orderBy: [{ startTime: status === "upcoming" ? "asc" : "desc" }, { id: "asc" }], skip: (page - 1) * pageSize, take: pageSize }),
@@ -58,15 +76,35 @@ export async function listReservations(userId: string, params = new URLSearchPar
 }
 
 export async function cancelReservation(userId: string, id: string, db = getPrisma()) {
+  validateResourceId(userId, "User");
+  return cancelScopedReservation(userId, id, db);
+}
+
+async function cancelScopedReservation(userId: string | null, id: string, db: PrismaClient) {
   validateResourceId(id, "Reservation");
   return db.$transaction(async tx => {
-    const rows = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM public.reservations WHERE id = ${id}::uuid AND "userId" = ${userId}::uuid FOR UPDATE`;
+    const rows = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM public.reservations WHERE id = ${id}::uuid AND (${userId}::uuid IS NULL OR "userId" = ${userId}::uuid) FOR UPDATE`;
     if (!rows.length) throw new ResourceError(404, "NOT_FOUND", "This reservation could not be found.");
     const row = await tx.reservation.findUniqueOrThrow({ where: { id }, include });
     if (row.status === "CANCELLED") return serialize(row);
     if (row.endTime <= new Date()) throw new ResourceError(409, "RESERVATION_COMPLETED", "Completed reservations cannot be cancelled.");
     return serialize(await tx.reservation.update({ where: { id }, data: { status: "CANCELLED", cancelledAt: new Date() }, include }));
   }, { maxWait: 10000, timeout: 15000 });
+}
+
+export async function listAdminReservations(actorId: string, params = new URLSearchParams(), db = getPrisma()) {
+  await assertAdminUser(actorId, db);
+  return listScopedReservations(null, params, db);
+}
+
+export async function getAdminReservation(actorId: string, id: string, db = getPrisma()) {
+  await assertAdminUser(actorId, db);
+  return getScopedReservation(null, id, db);
+}
+
+export async function cancelAdminReservation(actorId: string, id: string, db = getPrisma()) {
+  await assertAdminUser(actorId, db);
+  return cancelScopedReservation(null, id, db);
 }
 
 export async function checkAvailability(resourceId: string, startTime: Date, endTime: Date, db: Database = getPrisma()) {

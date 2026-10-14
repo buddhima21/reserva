@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { isSameOrigin } from "@/lib/auth/http";
 import { ResourceError } from "./validation";
 import { revalidatePath } from "next/cache";
+import { assertAdminUser } from "@/services/admin-access";
 
 export function resourceResponse(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
@@ -13,6 +14,12 @@ export async function authorizeResourceRequest(request: Request, mutation = fals
   if (mutation && !isSameOrigin(request)) throw new ResourceError(403, "INVALID_ORIGIN", "This request must come from the RESERVA application.");
   const user = await getCurrentUser();
   if (!user) throw new ResourceError(401, "UNAUTHORIZED", "Sign in to use the workspace.");
+  return user;
+}
+
+export async function authorizeAdminRequest(request: Request, mutation = false) {
+  const user = await authorizeResourceRequest(request, mutation);
+  await assertAdminUser(user.id);
   return user;
 }
 
@@ -40,4 +47,10 @@ export function refreshResourcePages(id: string) {
   revalidatePath("/availability");
   revalidatePath("/reservations");
   revalidatePath("/reservations/[id]", "page");
+  revalidatePath("/admin", "layout");
+}
+
+export function refreshReservationPages(id: string) {
+  for (const path of ["/reservations", `/reservations/${id}`, "/availability", "/dashboard", "/resources"]) revalidatePath(path);
+  revalidatePath("/admin", "layout");
 }

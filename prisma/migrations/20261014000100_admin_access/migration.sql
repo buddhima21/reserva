@@ -1,0 +1,11 @@
+BEGIN;
+
+CREATE TABLE public.admins (
+  "userId" UUID NOT NULL PRIMARY KEY,
+  "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "admins_userId_fkey" FOREIGN KEY ("userId") REFERENCES auth.users(id) ON DELETE CASCADE
+);
+ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.admins FROM anon, authenticated;
+
+COMMIT;

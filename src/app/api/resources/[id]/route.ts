@@ -1,4 +1,4 @@
-import { authorizeResourceRequest, resourceBody, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
+import { authorizeResourceRequest, authorizeAdminRequest, resourceBody, resourceFailure, resourceResponse, refreshResourcePages } from "@/lib/resources/http";
 import { parseResourceInput } from "@/lib/resources/validation";
 import { getResource, updateResource, deactivateResource } from "@/services/resources";
 
@@ -11,7 +11,7 @@ export async function GET(request: Request, context: RouteContext<"/api/resource
 
 export async function PATCH(request: Request, context: RouteContext<"/api/resources/[id]">) {
   try {
-    await authorizeResourceRequest(request, true);
+    await authorizeAdminRequest(request, true);
     const { id } = await context.params;
     const resource = await updateResource(id, parseResourceInput(await resourceBody(request), true));
     refreshResourcePages(id);
@@ -21,7 +21,7 @@ export async function PATCH(request: Request, context: RouteContext<"/api/resour
 
 export async function DELETE(request: Request, context: RouteContext<"/api/resources/[id]">) {
   try {
-    await authorizeResourceRequest(request, true);
+    await authorizeAdminRequest(request, true);
     const { id } = await context.params;
     const resource = await deactivateResource(id);
     refreshResourcePages(id);

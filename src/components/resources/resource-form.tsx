@@ -9,13 +9,13 @@ import { useWorkspaceFeedback } from "@/components/ui/workspace-feedback";
 
 const inputClass = "mt-2 w-full rounded-lg border border-ws-outline-variant/40 bg-ws-surface-container-low px-3 py-2.5 text-sm text-ws-on-surface";
 
-export function ResourceForm({ resource }: { resource?: ResourceRecord }) {
+export function ResourceForm({ resource, admin = false }: { resource?: ResourceRecord; admin?: boolean }) {
   const router = useRouter();
   const { notify, dismiss } = useWorkspaceFeedback();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
-  const cancelHref = resource ? `/resources/${resource.id}` : "/resources";
+  const cancelHref = admin ? "/admin/resources" : resource ? `/resources/${resource.id}` : "/resources";
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,7 +29,7 @@ export function ResourceForm({ resource }: { resource?: ResourceRecord }) {
       if (response.status === 401) { router.replace(`/login?next=${encodeURIComponent(resource ? `/resources/${resource.id}/edit` : "/resources/new")}`); router.refresh(); return; }
       if (!response.ok) { setError(result.error ?? "Unable to save this resource."); setFields(result.fields ?? {}); return; }
       notify(resource ? "Resource updated successfully." : "Resource created successfully.");
-      router.push(`/resources/${result.resource.id}`); router.refresh();
+      router.push(admin ? "/admin/resources" : `/resources/${result.resource.id}`); router.refresh();
     } catch { setError("Unable to save the resource. Check your connection and try again."); }
     finally { setPending(false); }
   }

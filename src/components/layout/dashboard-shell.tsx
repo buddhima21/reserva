@@ -4,11 +4,13 @@ import { WorkspaceNavigation } from "./workspace-navigation";
 import { Icon } from "@/components/ui/icon";
 import { HelpDialog } from "@/components/ui/help-dialog";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { SessionSync } from "@/components/auth/session-sync";
 import { WorkspaceFeedback, WorkspaceNotice } from "@/components/ui/workspace-feedback";
+import { WorkspaceAccess } from "./workspace-access";
 
-export function DashboardShell({ children, name }: { children: ReactNode; name: string }) {
+export function DashboardShell({ children, name, admin = false }: { children: ReactNode; name: string; admin?: boolean }) {
   return (
-    <WorkspaceFeedback><div className="reserva-workspace min-h-screen font-sans">
+    <WorkspaceAccess admin={admin}><WorkspaceFeedback><SessionSync /><div className="reserva-workspace min-h-screen font-sans">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3">Skip to content</a>
       <aside className="border-b border-ws-outline-variant/40 bg-ws-surface-container-lowest lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col lg:justify-between lg:border-r lg:border-b-0">
         <div>
@@ -21,7 +23,7 @@ export function DashboardShell({ children, name }: { children: ReactNode; name: 
         </div>
         <div className="hidden items-center gap-3 border-t border-ws-outline-variant/30 p-5 lg:flex">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ws-primary text-xs font-semibold text-white">{name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase()}</span>
-          <div className="min-w-0"><p className="truncate text-sm font-semibold text-ws-on-surface">{name}</p><p className="text-xs text-ws-on-surface-variant">Workspace member</p></div>
+          <div className="min-w-0"><p className="truncate text-sm font-semibold text-ws-on-surface">{name}</p><p className="text-xs text-ws-on-surface-variant">{admin ? "Administrator" : "Workspace member"}</p></div>
         </div>
       </aside>
       <div className="lg:pl-[260px]">
@@ -35,6 +37,6 @@ export function DashboardShell({ children, name }: { children: ReactNode; name: 
           {children}
         </main>
       </div>
-    </div></WorkspaceFeedback>
+    </div></WorkspaceFeedback></WorkspaceAccess>
   );
 }

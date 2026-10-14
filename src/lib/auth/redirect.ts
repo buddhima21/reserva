@@ -1,4 +1,4 @@
-const workspacePaths = ["/dashboard", "/resources", "/reservations", "/availability"];
+const workspacePaths = ["/dashboard", "/resources", "/reservations", "/availability", "/admin", "/settings"];
 
 export function safeAuthRedirect(value: unknown) {
   if (typeof value !== "string" || /[\\\x00-\x20]/.test(value)) return "/dashboard";

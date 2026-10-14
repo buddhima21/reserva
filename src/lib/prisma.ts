@@ -13,7 +13,14 @@ function createPrismaClient() {
 
 // Created lazily: build-time imports need no database connection or credentials.
 export function getPrisma() {
-  const prisma = globalForPrisma.prisma ?? createPrismaClient();
+  const cached = globalForPrisma.prisma;
+  // Hot reload preserves globals, including clients created before a model was added.
+  if (cached?.admin && cached.resource && cached.reservation) return cached;
+  if (cached) {
+    globalForPrisma.prisma = undefined;
+    void cached.$disconnect().catch(() => {});
+  }
+  const prisma = createPrismaClient();
   globalForPrisma.prisma = prisma;
   return prisma;
 }

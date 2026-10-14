@@ -87,7 +87,7 @@ function ReservationEditor({ resources, initial, now }: { resources: ResourceRec
   </div>;
 }
 
-export function CancelReservation({ id }: { id: string }) {
+export function CancelReservation({ id, admin = false }: { id: string; admin?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const { notify, dismiss } = useWorkspaceFeedback();
@@ -97,7 +97,7 @@ export function CancelReservation({ id }: { id: string }) {
     if (pending) return;
     dismiss(); setPending(true); setError("");
     try {
-      const response = await fetch(`/api/reservations/${id}`, { method: "DELETE" });
+      const response = await fetch(admin ? `/api/admin/reservations/${id}` : `/api/reservations/${id}`, { method: "DELETE" });
       const result = await response.json();
       if (response.status === 401) { router.replace(`/login?next=${encodeURIComponent(`/reservations/${id}`)}`); router.refresh(); return; }
       if (!response.ok) { setError(result.error ?? "Unable to cancel."); return; }

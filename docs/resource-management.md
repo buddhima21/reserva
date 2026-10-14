@@ -36,8 +36,9 @@ Supabase public certificate, just like the runtime adapter.
 
 Status is ACTIVE, MAINTENANCE, or INACTIVE. It describes operational readiness, not
 booking availability. Deactivation sets INACTIVE and never deletes the row. All
-statuses remain visible under All Statuses and can be filtered. There is no hard
-delete endpoint. Phase 3 connects dashboard, availability, and reservations to
+statuses remain visible under All Statuses and can be filtered. Admins can permanently
+delete resources without reservation history through `/api/admin/resources/[id]`.
+Dashboard, availability, and reservations are connected to
 PostgreSQL. Resources with ongoing or future CONFIRMED reservations cannot become
 INACTIVE or MAINTENANCE: a database trigger returns a meaningful HTTP 409. Cancel
 those bookings first. See [reservation behavior and concurrency](../README.md).
@@ -66,16 +67,18 @@ URLs. Name/location, category/status, lengths, integer capacity, IDs, and pagina
 are validated before database access.
 
 Errors contain `error` and `code`, plus `fields` for input errors. Expected status
-codes include 400 (invalid data/filter/ID), 401 (not signed in), 403 (cross-origin
-mutation), 404 (missing resource), 409 (conflict), 415 (incorrect content type), and
+codes include 400 (invalid data/filter/ID), 401 (not signed in), 403 (admin access
+required or cross-origin mutation), 404 (missing resource), 409 (conflict), 415 (incorrect content type), and
 503 (unavailable storage). Unexpected errors return a generic 500 response without
 database details. Resource responses use private/no-store cache headers.
 
 ## Access model
 
 Every resource API independently verifies Supabase Auth, including GET requests.
-Any signed-in workspace member can currently manage shared inventory; no admin role
-has been introduced. Passwords and user-editable metadata never grant elevated roles.
+All resource mutations require an administrator grant in the protected `admins`
+table. Members can browse inventory and make their own reservations. Management
+pages independently verify the role. Passwords and user-editable metadata never
+grant elevated roles. See [admin setup](../README.md#administrator-access).
 Mutations require a same-origin request. Database RLS is enabled and direct access
 for anon/authenticated Data API roles is revoked. Server Prisma uses the configured
 privileged database role, so application authentication checks remain essential.
@@ -95,6 +98,16 @@ search/filter behavior, and missing-record errors in a transaction which is alwa
 rolled back. No test resources remain after it passes. It requires the configured
 database connection. It does not create Auth test accounts.
 
-Manual check with your existing account: create a resource, reload its details,
+Manual check with your admin account: create a resource, reload its details,
 edit it, search/filter for it, deactivate it, then reactivate it from Edit Resource.
 Verify Cancel in the deactivation dialog changes nothing.
+
+Check the admin-only rule with a regular member account:
+
+1. Open `/resources`: resources are visible, with no Add, Edit, or Deactivate controls.
+2. Open `/resources/new` or `/resources/[id]/edit` directly: the member is redirected
+   to `/dashboard?access=admin-required`.
+3. From the application origin, send POST `/api/resources`, PATCH
+   `/api/resources/[id]`, or DELETE `/api/resources/[id]` using the member session:
+   each returns HTTP 403 with `code: "ADMIN_REQUIRED"`, before any write occurs.
+4. Sign in as an admin: the management controls and resource changes are available.

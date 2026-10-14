@@ -1,5 +1,6 @@
 "use client";
 
+import { useAdminAccess } from "@/components/layout/workspace-access";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
@@ -12,6 +13,7 @@ const controlClass = "h-9 max-w-full rounded-lg border border-ws-outline-variant
 const defaults = { q: "", category: "all", status: "all", capacity: "all", floor: "all", page: "1" };
 
 export function ResourceExplorer({ initial, initialError = "" }: { initial: ResourceList; initialError?: string }) {
+  const canManage = useAdminAccess();
   const [filters, setFilters] = useState(defaults);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [data, setData] = useState(initial);
@@ -56,7 +58,7 @@ export function ResourceExplorer({ initial, initialError = "" }: { initial: Reso
     </div>
     {error && <p role="alert" className="mb-4 rounded-xl bg-ws-error-container/60 p-4 text-sm text-ws-on-error-container">{error} <button type="button" onClick={retryLoad} className="ml-2 font-medium underline">Try again</button></p>}
     {!loading && !error && <p role="status" className="mb-4 text-sm text-ws-on-surface-variant">{`Showing ${data.items.length ? (data.page - 1) * data.pageSize + 1 : 0}–${data.items.length ? (data.page - 1) * data.pageSize + data.items.length : 0} of ${data.total} resources`}</p>}
-    {loading ? <WorkspaceLoading message="Loading resources…" /> : !error && data.items.length ? <div className={view === "grid" ? "grid grid-cols-1 gap-space-lg md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-space-md"}>{data.items.map(resource => <div key={resource.id} className={view === "list" ? "resource-list-item" : ""}><ResourceCard resource={resource} /></div>)}</div> : !error && !loading ? <div className="rounded-xl border border-ws-outline-variant/40 bg-white p-12 text-center"><h2 className="text-lg font-semibold text-ws-primary">No resources found</h2><p className="mt-2 text-sm text-ws-on-surface-variant">Add a resource or try another search.</p><div className="mt-4 flex flex-wrap justify-center gap-3"><Link href="/resources/new" className="rounded-lg bg-ws-primary px-4 py-2 text-sm text-white">Add Resource</Link><button type="button" onClick={resetFilters} className="rounded-lg bg-ws-surface-container-low px-4 py-2 text-sm text-ws-primary">Reset filters</button></div></div> : null}
+    {loading ? <WorkspaceLoading message="Loading resources…" /> : !error && data.items.length ? <div className={view === "grid" ? "grid grid-cols-1 gap-space-lg md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-space-md"}>{data.items.map(resource => <div key={resource.id} className={view === "list" ? "resource-list-item" : ""}><ResourceCard resource={resource} /></div>)}</div> : !error && !loading ? <div className="rounded-xl border border-ws-outline-variant/40 bg-white p-12 text-center"><h2 className="text-lg font-semibold text-ws-primary">No resources found</h2><p className="mt-2 text-sm text-ws-on-surface-variant">Try another search or reset your filters.</p><div className="mt-4 flex flex-wrap justify-center gap-3">{canManage && <Link href="/admin/resources/new" className="rounded-lg bg-ws-primary px-4 py-2 text-sm text-white">Add Resource</Link>}<button type="button" onClick={resetFilters} className="rounded-lg bg-ws-surface-container-low px-4 py-2 text-sm text-ws-primary">Reset filters</button></div></div> : null}
     {!loading && !error && data.total > data.pageSize && <nav aria-label="Resource pagination" className="mt-6 flex items-center justify-between gap-3"><button type="button" disabled={loading || data.page <= 1} onClick={() => filter("page", String(data.page - 1))} className={`${controlClass} disabled:opacity-50`}>Previous</button><span className="text-sm text-ws-on-surface-variant">Page {data.page} of {lastPage}</span><button type="button" disabled={loading || data.page >= lastPage} onClick={() => filter("page", String(data.page + 1))} className={`${controlClass} disabled:opacity-50`}>Next</button></nav>}
   </div>;
 }

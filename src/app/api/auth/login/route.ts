@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { authResponse, isSameOrigin, readAuthInput, validEmail, authErrorMessage } from "@/lib/auth/http";
+import { authResponse, isSameOrigin, readAuthInput, validEmail } from "@/lib/auth/http";
+import { loginErrorResponse } from "@/lib/auth/login-error";
 import { safeAuthRedirect } from "@/lib/auth/redirect";
+import { isAdminUser } from "@/services/admin-access";
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return authResponse({ error: "Invalid request origin." }, 403);
@@ -10,8 +12,13 @@ export async function POST(request: Request) {
   }
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({ email: input.email.trim(), password: input.password });
-    if (error) return authResponse({ error: error.code === "invalid_credentials" ? "The email or password is incorrect." : authErrorMessage(error.code) }, error.status === 429 ? 429 : 400);
-    return authResponse({ redirect: safeAuthRedirect(input.next) });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: input.email.trim(), password: input.password });
+    if (error) {
+      const failure = loginErrorResponse(error);
+      console.warn("Login authentication failed", { code: failure.body.code, status: error.status });
+      return authResponse(failure.body, failure.status);
+    }
+    const next = safeAuthRedirect(input.next);
+    return authResponse({ redirect: next === "/dashboard" && await isAdminUser(data.user.id) ? "/admin" : next });
   } catch { return authResponse({ error: "Sign in is temporarily unavailable. Please try again." }, 503); }
 }

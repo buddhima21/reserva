@@ -11,3 +11,10 @@ services directly without making HTTP requests to their own application.
 Connection helpers live in `src/lib/prisma.ts` and `src/lib/supabase/`.
 Authentication Route Handlers use Supabase Auth; shared validation and session
 helpers live in `src/lib/auth/`. Keep database access and secrets in server-only modules.
+
+`admin-access.ts` verifies persisted administrator grants. `admin.ts` provides
+platform statistics, owner labels, and permanent deletion without reservation
+history. Admin reservation methods verify the actor's grant before removing
+owner scoping; regular reservation methods retain it. Resource mutation Route
+Handlers independently require admin access. Role grants/revocation use only
+the trusted `admin:access` CLI, never signup metadata or an HTTP endpoint.
