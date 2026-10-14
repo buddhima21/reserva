@@ -1,0 +1,74 @@
+[
+  {
+    "id": "59934e4f-6f46-48c6-b178-2b222f120c15",
+    "slug": "executive-meeting-room-4a",
+    "name": "Executive Meeting Room 4A",
+    "category": "meeting",
+    "description": "Primary strategic briefing room with telepresence.",
+    "location": "Building 4, 4th Floor, East Wing (Room 402)",
+    "capacity": 16,
+    "status": "ACTIVE",
+    "floor": "4",
+    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCYKJVtTLIbOwEnms7dRmJDiwZU7gqogQXHrdzrqTB6szoDRNBVbMPEsRhk_MX4SzLYA4laea8j4FdMo5fNJ9WsNdFZPk4QMJU5VRCXI3pkR44gDtVoWXG-abns9MGpde4IzmSoDpX70TQmCDtE7vdVbu-hmeOIVLBtqS4nkVS3vftZoptXSvIQjKyXLW65gjGBlnVekbNugi4U-uDyQcjYeW_cESxVFKPlY3qzcpe6Ol5NWxX3XqmP"
+  },
+  {
+    "id": "0f904534-6775-4139-87e1-6f225d90204b",
+    "slug": "creative-studio",
+    "name": "Creative Studio",
+    "category": "workspace",
+    "description": "Soundproof multimedia recording and video production workspace.",
+    "location": "2nd Floor, Room 210",
+    "capacity": 8,
+    "status": "ACTIVE",
+    "floor": "2",
+    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCH5W9VI504XiBAzH6YJWjrTGxlUZ1XDNxy3RFsmnI24GbKiv1ndgK7SadvB9NK7_rZibQDnuuxStWCM2ZlnY3D7v-ktvvZDOJZBOPKZA6QLz-5SPOHn3rRPbtabZWwrxyyRb3-oCnW3qYsOdqIX5NuSBy_ymc87k4oVu4K7FP-6LQhyaxvXDHX-Pax8BZnSk1VtMYIkptAs_1PtTksqOrkjWNMmW2MhLdsIIjep54txrksAhnLKErL"
+  },
+  {
+    "id": "b54956e7-cc83-4e93-a30c-9a6b72bab575",
+    "slug": "conference-hall-a",
+    "name": "Conference Hall A",
+    "category": "event",
+    "description": "Auditorium for all-hands meetings and presentations.",
+    "location": "Ground Floor Auditorium",
+    "capacity": 60,
+    "status": "ACTIVE",
+    "floor": "ground",
+    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCtsUBgSMe2_FUFqFzkaStv7P0IY0bIXTa6Um7bM0Fo5eoE8C4QW22utZzmRVW2d0X6oaYgNeD471SmLPvRtyNRh--LA9WsokdBtKekRSHFpLcwGEHxRVg10pMAFFS2I-SfX99LrmSw1UO2P42e0q4C6hSEWxgIYwX--30yxi0dOsk8L0IrdzLxUXD0P0sZV6aO9QXBaU3QuR1tXBpPdBXaXkrXkKz29nddjkpIWPhw9gBA6sRMb84W"
+  },
+  {
+    "id": "593be8b4-50d8-4e8d-851d-b7e1e8e8b95d",
+    "slug": "portable-4k-projector",
+    "name": "Portable 4K Laser Projector",
+    "category": "equipment",
+    "description": "Portable ultra-bright projector with wireless presentation support.",
+    "location": "IT Desk Locker #4",
+    "capacity": 0,
+    "status": "ACTIVE",
+    "floor": null,
+    "imageUrl": null
+  },
+  {
+    "id": "36826fbc-92bf-44c5-a587-a194d9a8ef42",
+    "slug": "macbook-pro-m3-max",
+    "name": "MacBook Pro 16\" (M3 Max)",
+    "category": "equipment",
+    "description": "Development and GPU benchmark loaner workstation.",
+    "location": "Device Lab Locker B",
+    "capacity": 0,
+    "status": "ACTIVE",
+    "floor": null,
+    "imageUrl": null
+  },
+  {
+    "id": "bea43afe-73e9-4c79-ae48-567b91cbd4ac",
+    "slug": "the-greenhouse",
+    "name": "The Greenhouse",
+    "category": "workspace",
+    "description": "Flexible collaboration space with movable boards and natural daylight.",
+    "location": "3rd Floor, Atrium",
+    "capacity": 10,
+    "status": "ACTIVE",
+    "floor": "3",
+    "imageUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuAteFIPG8K5U1uP_X7uGsTPb9bP4fvwrvDgG_C3H9zGP6iiVHDVhhF8eVQxoyF_SwOswXWPlVMi8J-TRUI1sh-flLrY77HtGkzKiLouKnFDAaqmEwj_PTLfBTwXnAgGCRqDy-vHvLAuzV67zW7URXoI3P1OsGyloYlVVFne32z7_yZGgHIpQckWJVlCIWRarCv_bgxlTRPb00dHsH4GdSzmK-r6Xia-zuzEBFfROWRmRobIHoyWQVHr"
+  }
+]

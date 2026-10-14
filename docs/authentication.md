@@ -7,12 +7,14 @@ Credentials and session tokens are never returned in JSON or logged.
 
 The shared workspace layout verifies the user server-side before rendering its shell.
 Proxy refreshes cookies, performs early login redirects, and preserves the requested
-workspace URL. Future reservation/resource API handlers must independently check
-authentication and ownership; layout protection alone does not protect APIs.
+workspace URL. Resource and reservation API handlers independently check
+authentication; reservations also enforce ownership. Layout protection alone does
+not protect APIs.
 
 Names are stored in Supabase Auth's `full_name` user metadata for presentation only.
-They never confer permissions. No profile/reservation schema migration is applied.
-Reservation screens still contain sample data. There are no new dependencies.
+They never confer permissions. Reservations now reference auth.users.id directly
+through a restrictive foreign key; no duplicate profile/password table is needed.
+The reservation migration preserves Supabase-managed identities and booking history.
 
 ## Supabase dashboard configuration
 

@@ -1,5 +1,11 @@
 # Phase 1: database inspection and proposed schema
 
+Historical proposal only. Phases 2 and 3 have since applied resource and reservation
+migrations. The final implementation uses CONFIRMED/CANCELLED reservations and a
+direct foreign key to auth.users; no Profile table or DRAFT state was needed.
+See [the current implementation](../README.md) and [resource management](resource-management.md).
+The proposal below records earlier options and is not the current schema.
+
 This is a proposal, not an applied migration. Inspection performed on October 13,
 2026. No application code, database records, or Supabase-managed tables were changed.
 

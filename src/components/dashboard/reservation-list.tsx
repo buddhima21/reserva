@@ -1,20 +1,16 @@
-"use client";
+import Link from "next/link";
+import { Icon } from "@/components/ui/icon";
+import { displayBookingTime, type ReservationListData } from "@/lib/reservations";
+import { CancelReservation } from "@/components/reservations/reservation-form";
 
-import { useState } from "react";
-import type { ReservationPreview } from "@/types/workspace-preview";
-
-export function ReservationList({ items }: { items: ReservationPreview[] }) {
-  const [filter, setFilter] = useState("all");
-  const visible = items.filter(item => filter === "all" || item.category === filter);
-  return (
-    <>
-      <div className="flex flex-col justify-between gap-space-md rounded-xl bg-ws-surface-container-lowest p-space-lg shadow-sm xl:flex-row xl:items-center">
-        <div><h2 className="text-headline-md font-bold tracking-tight text-ws-primary">Today&apos;s Reservations</h2><p className="text-body-sm text-ws-on-surface-variant">Sample allocations across your workspace</p></div>
-        <div className="flex flex-wrap gap-1 self-start rounded-xl bg-ws-surface-container-low p-1" aria-label="Reservation filters">
-          {[["all", "All Today"], ["my", "My Bookings"], ["team", "Team Bookings"]].map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`rounded-lg px-3 py-1.5 text-sm font-medium ${filter === value ? "bg-white text-ws-on-surface shadow-sm" : "text-ws-on-surface-variant"}`}>{label} ({items.filter(item => value === "all" || item.category === value).length})</button>)}
-        </div>
-      </div>
-      <div className="flex flex-col gap-space-sm" role="region" aria-label="Reservations"><p className="sr-only" role="status">{visible.length} reservations shown</p>{visible.map(item => <div key={item.id}>{item.content}</div>)}</div>
-    </>
-  );
+export function ReservationList({ data, now, dashboard = false }: { data: ReservationListData; now: string; dashboard?: boolean }) {
+  return <section><div className="mb-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-headline-sm font-semibold text-ws-primary">{dashboard ? "Your Upcoming Reservations" : "Your Reservations"}</h2><p className="mt-1 text-xs text-ws-on-surface-variant">Times shown in Asia/Colombo</p></div>{dashboard ? <Link href="/reservations" className="text-sm font-medium text-ws-secondary">View all</Link> : <nav aria-label="Reservation filters" className="flex flex-wrap gap-1 rounded-xl bg-ws-surface-container-low p-1">{[["all", "All"], ["upcoming", "Upcoming"], ["completed", "Completed"], ["CANCELLED", "Cancelled"]].map(([value, label]) => <Link key={value} href={`/reservations?status=${value}`} aria-current={data.status === value ? "page" : undefined} className={`rounded-lg px-3 py-2 text-sm ${data.status === value ? "bg-white font-medium text-ws-primary shadow-sm" : "text-ws-on-surface-variant"}`}>{label}</Link>)}</nav>}</div>
+    <div className="space-y-3">{data.items.length ? data.items.map(reservation => {
+      const completed = new Date(reservation.endTime) <= new Date(now);
+      const ongoing = !completed && new Date(reservation.startTime) <= new Date(now);
+      const label = reservation.status === "CANCELLED" ? "Cancelled" : completed ? "Completed" : ongoing ? "In progress" : "Confirmed";
+      return <article key={reservation.id} className="flex flex-col justify-between gap-4 rounded-xl border border-ws-outline-variant/30 bg-white p-5 shadow-sm sm:flex-row sm:items-center"><div><div className="flex flex-wrap items-center gap-3"><Link href={`/reservations/${reservation.id}`} className="font-semibold text-ws-primary hover:underline">{reservation.resource.name}</Link><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${reservation.status === "CONFIRMED" && !completed ? "bg-ws-secondary-container text-ws-on-secondary-container" : "bg-ws-surface-container-low text-ws-on-surface-variant"}`}>{label}</span></div><p className="mt-2 text-sm text-ws-on-surface">{reservation.purpose}</p><p className="mt-3 flex items-center gap-2 text-xs text-ws-on-surface-variant"><Icon name="schedule" />{displayBookingTime(reservation.startTime)} – {displayBookingTime(reservation.endTime)}</p></div><div className="flex shrink-0 flex-wrap gap-2"><Link href={`/reservations/${reservation.id}`} className="rounded-lg bg-ws-surface-container-low px-4 py-2 text-sm font-medium text-ws-primary">Details</Link>{reservation.status === "CONFIRMED" && !completed && <CancelReservation id={reservation.id} />}</div></article>;
+    }) : <div className="rounded-xl bg-white p-8 text-center"><p className="text-sm text-ws-on-surface-variant">No reservations match this view.</p><Link href="/reservations/new" className="mt-4 inline-block text-sm font-medium text-ws-secondary">Create a reservation</Link></div>}</div>
+    {!dashboard && data.total > data.pageSize && <nav aria-label="Reservation pagination" className="mt-6 flex items-center justify-between text-sm"><span>{data.total} reservations · Page {data.page}</span><div className="flex gap-4">{data.page > 1 && <Link href={`/reservations?status=${data.status}&page=${data.page - 1}`} className="text-ws-secondary">Previous</Link>}{data.page * data.pageSize < data.total && <Link href={`/reservations?status=${data.status}&page=${data.page + 1}`} className="text-ws-secondary">Next</Link>}</div></nav>}
+  </section>;
 }

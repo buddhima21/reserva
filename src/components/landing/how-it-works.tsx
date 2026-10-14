@@ -24,7 +24,7 @@ export function HowItWorks() {
               </div>
               <h3 className="text-lg font-bold text-forest mb-2">Reserve</h3>
               <p className="text-sm text-charcoal-muted max-w-xs mx-auto leading-relaxed">
-                Select a date and time that works with guaranteed zero-conflict scheduling telemetry.
+                    Choose a date and time, check availability, and confirm your reservation.
               </p>
             </div>
             <div className="bg-white p-8 rounded-2xl border border-border-light text-center shadow-subtle hover:border-border-strong transition-all">
@@ -33,7 +33,7 @@ export function HowItWorks() {
               </div>
               <h3 className="text-lg font-bold text-forest mb-2">Done</h3>
               <p className="text-sm text-charcoal-muted max-w-xs mx-auto leading-relaxed">
-                Your reservation is confirmed and synced directly with your team calendar and door access.
+                    Find your confirmed booking in Reservations, with its details and cancellation controls.
               </p>
             </div>
           </div>
