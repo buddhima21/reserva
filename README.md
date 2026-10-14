@@ -126,17 +126,54 @@ shortcut opens real upcoming reservations, and the landing footer links to login
 npm run lint
 npm run typecheck
 npm run build
-node --conditions=react-server --import tsx --test tests/auth.test.ts tests/resources.test.ts tests/reservations.test.ts
-node --conditions=react-server --import tsx tests/resources.integration.ts
-node --conditions=react-server --import tsx tests/reservations.integration.ts
+npm test
+npm run test:integration
 ```
+
+Run `npm run test:resources` or `npm run test:reservations` to isolate a database
+suite. `npm test` needs no database. Run `npm run db:check` first if integration
+checks fail during setup; it verifies database and Auth connectivity without
+printing credentials. Integration failures report a stage and error code.
 
 The build fetches configured Google fonts when needed. Integration checks require
 the configured database. Reservation checks borrow existing Auth IDs without
 creating accounts, use isolated temporary resources/bookings, and clean up only
 their generated IDs. They test ownership, cancellation, adjacency, availability,
-concurrent service requests, and independent raw database writes.
+concurrent service requests, maintenance/inactive resource protection, retained
+cancelled history, and independent raw database writes. Resource CRUD runs inside
+a rolled-back transaction, allowing up to ten seconds to acquire a connection
+to the hosted database.
 
-Manual check: log in, select a free timeline window, confirm, reload details, then
-cancel. Verify Cancelled history retains the booking and the slot is available.
-A second account must not access the first account's reservation details.
+Manual assessment checks (`npm run dev`, then sign in):
+
+1. Create a temporary resource at `/resources/new`. Find it in the catalog, open
+   its details, edit its name/capacity, and reload to verify persistence.
+2. Deactivate it and verify its inactive status. Reactivate it through the edit
+   form before booking; deactivation preserves the record and booking history.
+3. Select a future free window in Availability and create a reservation. Reload
+   its details and confirm the resource and times are retained.
+4. Submit another booking for an overlapping window on that resource. Expect a
+   conflict message; a booking starting exactly when the first ends is allowed.
+   Attempting to deactivate the resource while it has a future booking should
+   also be rejected.
+5. Cancel the first reservation. Verify Cancelled history retains it and its slot
+   is free, then book the released slot again. With a second account, verify the
+   first account's reservation details cannot be viewed or cancelled.
+
+The automated integration suites exercise services and database constraints.
+The manual checklist covers the browser forms and feedback as well.
+
+## GitHub Actions
+
+[CI workflow](.github/workflows/ci.yml) runs on every push to `main`. It installs
+locked dependencies with `npm ci` on Node.js 24, then runs lint, type-checking,
+unit tests, and the production build. Any failed step marks the run as failed.
+It uses build-only placeholder settings and requires no repository secrets.
+Database integration tests are separate: they require a configured database
+with migrations applied and at least one existing Supabase Auth user.
+
+Commit and push the workflow together with the test scripts in `package.json`
+and their test files. Open the repository's **Actions** tab and select **CI** to
+view results. Once the workflow is on the default branch, **Run workflow** can
+also trigger it manually. This workflow checks the project; deployment is not
+configured.

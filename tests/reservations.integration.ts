@@ -42,14 +42,22 @@ async function main() {
 
   stage = "cancellation, released slots, and resource status protection";
   await assert.rejects(updateResource(resource.id, { status: "INACTIVE" }), { status: 409, code: "RESOURCE_IN_USE" });
+  await assert.rejects(updateResource(resource.id, { status: "MAINTENANCE" }), { status: 409, code: "RESOURCE_IN_USE" });
   const cancelled = await cancelReservation(owner, first.id);
   assert.equal(cancelled.status, "CANCELLED");
   assert.equal((await cancelReservation(owner, first.id)).cancelledAt, cancelled.cancelledAt);
+  assert.equal((await getReservation(owner, first.id)).status, "CANCELLED");
+  const cancelledHistory = await listReservations(owner, new URLSearchParams({ status: "CANCELLED" }));
+  assert.ok(cancelledHistory.total > 0);
+  assert.ok(cancelledHistory.items.every(row => row.status === "CANCELLED" && row.userId === owner));
   assert.equal((await checkAvailability(resource.id, new Date(base), new Date(base + hour))).available, true);
   const replacement = await create(base, base + hour);
   await cancelReservation(owner, adjacent.id);
   await cancelReservation(owner, replacement.id);
   await updateResource(resource.id, { status: "INACTIVE" });
+  await assert.rejects(createReservation(owner, input(base + hour * 4, base + hour * 5)), { code: "RESOURCE_UNAVAILABLE" });
+  assert.equal((await checkAvailability(resource.id, new Date(base), new Date(base + hour))).available, false);
+  await updateResource(resource.id, { status: "MAINTENANCE" });
   await assert.rejects(createReservation(owner, input(base + hour * 4, base + hour * 5)), { code: "RESOURCE_UNAVAILABLE" });
   await updateResource(resource.id, { status: "ACTIVE" });
   await assert.rejects(createReservation(owner, input(Date.now() - hour, Date.now() + hour)), { code: "PAST_START" });
