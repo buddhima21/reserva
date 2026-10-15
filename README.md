@@ -129,55 +129,15 @@ The command changes only the administrator grant; it does not create an account 
 
 ## Database design
 
-The current database has three application entities and references Supabase's managed user entity. The foreign keys to `auth.users` are defined in SQL migrations; Prisma does not manage the Auth schema.
+RESERVA uses PostgreSQL with three application tables:
 
-```mermaid
-erDiagram
-    AUTH_USERS ||--o| ADMINS : "may have admin grant"
-    AUTH_USERS ||--o{ RESERVATIONS : "creates"
-    RESOURCES ||--o{ RESERVATIONS : "receives"
+- **Resources** stores shared rooms, spaces, and equipment, including their location, capacity, and operational status.
+- **Reservations** links each booking to one resource and one Supabase Auth user, with its start and end times, purpose, status, and cancellation history.
+- **Admins** grants administrator access through a unique reference to a Supabase Auth user.
 
-    AUTH_USERS {
-        uuid id PK
-        string email
-        jsonb raw_user_meta_data
-    }
-    ADMINS {
-        uuid userId PK, FK
-        timestamptz createdAt
-    }
-    RESOURCES {
-        uuid id PK
-        string name
-        string description
-        string category
-        string location
-        int capacity
-        ResourceStatus status
-        string floor
-        string imageUrl
-        string slug UK
-        timestamptz createdAt
-        timestamptz updatedAt
-    }
-    RESERVATIONS {
-        uuid id PK
-        uuid resourceId FK
-        uuid userId FK
-        timestamptz startTime
-        timestamptz endTime
-        ReservationStatus status
-        string purpose
-        string notes
-        timestamptz cancelledAt
-        timestamptz createdAt
-        timestamptz updatedAt
-    }
-```
+Supabase manages user identities in `auth.users`. A user can have many reservations and at most one administrator grant; a resource can have many reservations. Database constraints prevent overlapping confirmed bookings and require the end time to be later than the start time. Foreign keys preserve reservation history.
 
-`ResourceStatus` is `ACTIVE`, `MAINTENANCE`, or `INACTIVE`. `ReservationStatus` is `CONFIRMED` or `CANCELLED`; upcoming, ongoing, and completed are derived from reservation times. Nullable metadata fields and additional Supabase-managed user fields are documented in the [Prisma schema](prisma/schema.prisma) and [SQL migrations](prisma/migrations).
-
-Reservation foreign keys restrict deletion to preserve history. Administrator grants are removed when their Auth user is deleted. SQL migrations also contain check constraints, overlap exclusion, and triggers that Prisma's schema cannot fully represent.
+[View the complete ER diagram on dbdiagram.io](https://dbdiagram.io/d/6ad07cb0aebfe7a21ff68232).
 
 ## Project structure
 
@@ -229,13 +189,3 @@ The [GitHub Actions workflow](.github/workflows/ci.yml) runs lint, typecheck, un
 4. Cancel a booking, confirm its history remains, and reserve the released slot again.
 5. Use another member account to verify ownership protection. Return as administrator to review all bookings and cancel a member's upcoming reservation.
 6. Check small-screen layouts, validation feedback, empty states, and sign-out across two open tabs.
-
-## Assessment submission materials
-
-| Deliverable | Location / status |
-| --- | --- |
-| Complete application source and setup instructions | [GitHub repository](https://github.com/buddhima21/reserva) and this README |
-| Entity relationship diagram | [Shareable database-design section](https://github.com/buddhima21/reserva#database-design); available after this README is pushed |
-| 3-5 minute demonstration video | Recording link still to be added before submission |
-
-The demonstration should explain the resource-coordination problem, show the booking/conflict/cancellation flow, and describe the authorization, database, and concurrency decisions. Submit accessible repository, video, and ER diagram links through the official assessment form.
