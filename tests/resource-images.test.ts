@@ -50,7 +50,14 @@ test("multipart submissions reject duplicate fields, forged fields, and ambiguou
 });
 
 test("the body limit also rejects oversized uploads without content-length", async () => {
-  const request = submission(new File([new Uint8Array(MAX_RESOURCE_IMAGE_BYTES + 100_000)], "large.png", { type: "image/png" }));
+  const multipart = submission(new File([new Uint8Array(MAX_RESOURCE_IMAGE_BYTES + 100_000)], "large.png", { type: "image/png" }));
+  // Finish Undici's asynchronous multipart encoder before the size guard cancels
+  // the reader. Cancelling the encoder mid-flight can reject after the test ends.
+  const request = new Request(multipart.url, {
+    method: "POST",
+    headers: multipart.headers,
+    body: await multipart.arrayBuffer(),
+  });
   assert.equal(request.headers.has("content-length"), false);
   await assert.rejects(readResourceSubmission(request), error => error instanceof ResourceError && error.status === 413);
 });
