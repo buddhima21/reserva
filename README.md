@@ -1,304 +1,241 @@
 # RESERVA
 
-Resource Reservation Management System for the PrimeWave Lab internship assessment.
-Next.js App Router, TypeScript, Tailwind CSS, Prisma, Supabase PostgreSQL and Auth.
+A resource reservation management system built for the PrimeWave Lab Software Engineering Internship Technical Assessment.
 
-## Functionality
+RESERVA replaces manual booking records with a shared resource catalog, a daily availability schedule, and persistent reservations. PostgreSQL prevents overlapping confirmed bookings, including simultaneous requests for the same resource.
 
-- Login, immediate signup without confirmation emails, and sign-out.
-- Resource CRUD with safe deactivation, search, filters, and pagination.
-- Resource images from a device upload with a preview, or an existing HTTPS URL.
-- Persisted reservations, personal history, details, and cancellation.
-- Live resource availability and dashboard counts from PostgreSQL.
-- Concurrent booking protection enforced by PostgreSQL.
-- Protected administrator workspace with platform statistics, resource CRUD,
-  operational status controls, and reservation management across all members.
+## Features
 
-The supplied landing and workspace designs are preserved. Server Components load
-data; focused Client Components handle forms, dialogs, and timeline selection.
-The landing page product illustration remains an illustrative preview.
+- **Members:** sign up, sign in, browse and filter resources, check availability, create reservations, view personal booking history, and cancel upcoming or ongoing bookings.
+- **Administrators:** create and edit resources, upload resource images, manage operational status, view platform statistics and all members' bookings, and cancel reservations across the workspace.
+- **Account settings:** update a display name, change a password using the current password, and sign out across open workspace tabs.
+- **Usability:** loading and empty states, validation feedback, retryable errors, pagination, and booking times displayed in Asia/Colombo.
 
-## Local setup
+## Technology stack
 
-Copy `.env.example` to `.env`. Set the PostgreSQL session pooler URL (port 5432)
-as `DATABASE_URL`, with a URL-encoded password. Set the Supabase HTTPS Project URL
-and publishable key in the two `NEXT_PUBLIC_SUPABASE_*` variables. Keep passwords
-and service-role keys out of public variables and Git.
+| Area | Technology |
+| --- | --- |
+| Application | Next.js 16 App Router, React 19, TypeScript |
+| Styling | Tailwind CSS 4, GSAP for landing-page motion |
+| Database | PostgreSQL hosted on Supabase |
+| Database access | Prisma 7 with the PostgreSQL driver adapter |
+| Authentication | Supabase Auth with server-managed session cookies |
+| Image storage | Supabase Storage; Sharp validates and optimizes uploads |
+| Version control and CI | Git, GitHub, GitHub Actions |
+
+## Run locally
+
+### Prerequisites
+
+- Node.js 24 and npm, matching the CI runtime.
+- Git.
+- A Supabase project with PostgreSQL, Email authentication, and Storage. The application runs locally and connects to this project; a standalone PostgreSQL instance alone does not provide its Auth and Storage dependencies.
+
+### 1. Clone and configure
+
+```sh
+git clone https://github.com/buddhima21/reserva.git
+cd reserva
+```
+
+Copy `.env.example` to `.env` and replace its placeholders:
+
+```dotenv
+DATABASE_URL="postgresql://USER:URL_ENCODED_PASSWORD@SESSION_POOLER_HOST:5432/postgres"
+NEXT_PUBLIC_SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="YOUR_PUBLISHABLE_KEY"
+```
+
+Use the Supabase **session pooler** connection on port 5432 and URL-encode special characters in the database password. Keep the actual connection string in `.env`; it is ignored by Git. The publishable key is the client-safe project key. A service-role key is not required.
+
+In the Supabase dashboard:
+
+1. Enable the Email authentication provider.
+2. Set the local Site URL to `http://localhost:3000`.
+3. Turn **Confirm email OFF** so signup returns a session immediately. The application checks this setting before creating an account.
+
+See [authentication configuration](docs/authentication.md) for details.
+
+### 2. Install and prepare the database
 
 ```sh
 npm ci
 npm run db:migrate
 npm run db:seed
+npm run db:check
+```
+
+Installation generates the Prisma client. Migrations create application tables, database constraints, administrator grants, and the `resource-images` storage bucket and policies. The idempotent seed adds six resources while preserving existing edits; it does not create accounts or bookings.
+
+Keep `certs/supabase-ca.crt` available: Prisma and the PostgreSQL adapter use this public CA certificate to verify TLS. See [certificate details](certs/README.md).
+
+### 3. Start the application
+
+```sh
 npm run dev
 ```
 
-Open http://localhost:3000. Disable Supabase Email Confirm email as described in
-[authentication setup](docs/authentication.md). Use a Node.js version supported by
-the installed Next.js version (`node_modules/next/package.json`, `engines`).
-The idempotent seed creates the six original resources, preserving edits. It
-creates no users or bookings. Migrations are additive; never reset a populated
-database to make them pass. Prisma clients and CLI verify TLS using the public
-certificate in `certs/supabase-ca.crt`. Keep this certificate in deployments.
+Open [http://localhost:3000](http://localhost:3000). Sign up for a member account or use the assessment administrator account below.
 
-## Structure
-
-```text
-src/app/                       Route entry points and API Route Handlers
-src/app/(workspace)/           Protected dashboard, resources, reservations, availability
-src/components/                Existing UI and interactive forms
-src/lib/                       Auth, validation, time utilities, Prisma singleton
-src/services/                  Resource and reservation business logic
-src/types/                     Shared resource/navigation types
-prisma/                        Schema, reviewed SQL migrations, seed resource data
-```
-
-Reservation details: `/reservations/[id]`; new bookings: `/reservations/new`.
-The existing Room 4A URL remains an alias to its saved record. The generated Prisma
-client is ignored and regenerated on install/build. Supabase manages identities
-and sessions; the existing Prisma singleton manages application data.
-
-## Reservation behavior
-
-Enter/display times in Asia/Colombo; PostgreSQL stores absolute instants as
-`timestamptz`. Start must be in the future and end strictly later. Overnight and
-multi-day bookings work. The old sample hours/four-hour limit are not imposed.
-Only ACTIVE resources can be booked. CONFIRMED bookings block overlapping intervals;
-adjacent bookings are allowed. Cancel upcoming or ongoing bookings to release
-slots while retaining history. Completed bookings cannot be cancelled. Repeating
-cancellation preserves the original cancellation timestamp.
-
-Every API verifies Supabase Auth. Ownership comes from the session and cannot be
-submitted by clients. Users see/cancel only their own reservations. Shared
-availability reveals occupied times without identities, purposes, or notes.
-Only administrators can create, edit, deactivate, or delete shared resources.
-Members can browse resources and manage their own bookings. Resources with ongoing
-or future confirmed bookings cannot be deactivated or put under maintenance.
-
-Admins can select a JPG, PNG, or WebP image (up to 4 MB and 25 megapixels) when
-creating or editing a resource. The server validates and optimizes uploads to
-WebP, then saves them in the Supabase `resource-images` bucket. Run `npm run
-db:migrate` to create the bucket and admin-only upload/cleanup policies. This uses
-the signed-in admin's session; no service-role key is needed. Resource photos in
-this bucket are public. Existing image URLs continue to work. Uploads happen only
-on save, and a failed resource save removes its new upload. Replacing an image
-keeps the previous object, since another resource may reference its URL.
-
-Availability is a snapshot. Creation rechecks inside a transaction, locks the
-resource row, and inserts under the `reservations_no_overlap` GiST exclusion
-constraint. The constraint protects concurrent requests and direct database
-writes. Database triggers coordinate booking and resource status changes.
-
-## Reservation API
-
-| Method | Endpoint | Behavior |
-| --- | --- | --- |
-| POST | `/api/reservations` | Create, HTTP 201 |
-| GET | `/api/reservations` | Paginated personal bookings |
-| GET | `/api/reservations/[id]` | Personal details |
-| DELETE | `/api/reservations/[id]` | Cancel, retain history |
-| GET | `/api/availability?date=YYYY-MM-DD` | Colombo day schedule |
-| GET | `/api/availability?resourceId=UUID&startTime=ISO&endTime=ISO` | Check interval |
-
-Creation accepts `resourceId`, `startTime`, `endTime`, `purpose` (2–120 characters),
-and optional `notes` (up to 1,000). Times require explicit Z or offset. Listing
-accepts `status` (all/upcoming/completed/CANCELLED), `page`, `pageSize` (1–100).
-Use URLSearchParams to encode ISO offsets in queries.
-Errors return `error`, `code`, and optional field feedback: 400 invalid inputs,
-401 missing session, 403 cross-origin mutation, 404 missing/unowned booking,
-409 booking conflict or invalid state, 415 wrong content type, 503 temporary
-storage failures. Responses are private/no-store; raw database errors stay private.
-See [resource management](docs/resource-management.md) for resource endpoints.
-
-## Database integrity
-
-Both application tables enable RLS and revoke direct Supabase Data API access
-for anon/authenticated roles. Privileged Prisma access therefore requires the
-application authentication/ownership checks. Reservation userId directly references
-Supabase-managed `auth.users.id`. No duplicate password/profile table is needed.
-Restrictive foreign keys retain history; deleting an Auth account with bookings
-requires an explicit retention policy in a later feature.
-
-SQL migrations include exclusion/check constraints, the Auth foreign key, and
-triggers that Prisma cannot fully represent. Preserve them in future migrations.
-Do not edit already-applied migrations.
-
-## Design and checks
-
-Semantic Tailwind tokens and the existing ws- workspace theme remain in use.
-Cache Components, partial prefetching, and Tailwind Turbopack configuration remain.
-No dependencies were added for reservation management.
-
-Frontend integration includes shared loading skeletons, retryable workspace
-errors, empty states with next actions, and dismissible success feedback after
-resource and reservation mutations. Filter/date changes hide stale results while
-loading; failed fetches do not show outdated records as current. Resource changes
-invalidate dashboard, availability, and reservation views. The header booking
-shortcut opens real upcoming reservations, and the landing footer links to login.
+For a production build running locally:
 
 ```sh
-npm run lint
-npm run typecheck
 npm run build
-npm test
-npm run test:integration
-npm run test:http
+npm start
 ```
 
-Run `npm run test:resources`, `npm run test:reservations`, or `npm run test:admin` to isolate a database
-suite. `npm test` needs no database. Run `npm run db:check` first if integration
-checks fail during setup; it verifies database and Auth connectivity without
-printing credentials. Integration failures report a stage and error code.
-
-The build fetches configured Google fonts when needed. Integration checks require
-the configured database. Reservation checks borrow existing Auth IDs without
-creating accounts, use isolated temporary resources/bookings, and clean up only
-their generated IDs. They test ownership, cancellation, adjacency, availability,
-concurrent service requests, maintenance/inactive resource protection, retained
-cancelled history, and independent raw database writes. Resource CRUD runs inside
-a rolled-back transaction, allowing up to ten seconds to acquire a connection
-to the hosted database. Admin integration checks require an existing admin grant
-and a second Auth account; they test role rejection, cross-owner management,
-statistics, cancellation, and deletion with history protection. `test:http`
-requires a completed build, starts its own temporary localhost server, checks
-anonymous redirects/API rejection and origin protection, then stops the server.
-
-Manual assessment checks (`npm run dev`, then sign in as an administrator for
-resource management):
-
-1. Create a temporary resource at `/resources/new`. Find it in the catalog, open
-   its details, edit its name/capacity, and reload to verify persistence.
-2. Deactivate it and verify its inactive status. Reactivate it through the edit
-   form before booking; deactivation preserves the record and booking history.
-3. Select a future free window in Availability and create a reservation. Reload
-   its details and confirm the resource and times are retained.
-4. Submit another booking for an overlapping window on that resource. Expect a
-   conflict message; a booking starting exactly when the first ends is allowed.
-   Attempting to deactivate the resource while it has a future booking should
-   also be rejected.
-5. Cancel the first reservation. Verify Cancelled history retains it and its slot
-   is free, then book the released slot again. With a second account, verify the
-   first account's reservation details cannot be viewed or cancelled.
-
-Members must receive HTTP 403 when attempting resource mutations or any admin
-API. Opening `/admin` as a member redirects to the member dashboard. Sign in as
-an admin, open **Administration**, and verify all members' bookings are visible;
-cancel another member's future booking and verify it is cancelled in that
-member's history. Confirm only admins see inventory management actions.
-
-The automated integration suites exercise services and database constraints.
-The manual checklist covers the browser forms and feedback as well.
-
-## GitHub Actions
-
-[CI workflow](.github/workflows/ci.yml) runs on every push to `main`. It installs
-locked dependencies with `npm ci` on Node.js 24, then runs lint, type-checking,
-unit tests, the production build, and HTTP access checks. Any failed step marks the run as failed.
-It uses build-only placeholder settings and requires no repository secrets.
-Database integration tests are separate: they require a configured database
-with migrations applied and at least one existing Supabase Auth user.
-
-Commit and push the workflow together with the test scripts in `package.json`
-and their test files. Open the repository's **Actions** tab and select **CI** to
-view results. Once the workflow is on the default branch, **Run workflow** can
-also trigger it manually. This workflow checks the project; deployment is not
-configured.
+The build may require network access to download its configured Google fonts.
 
 ## Administrator access
 
-Admins sign in through the existing login page. With no explicit destination,
-admin login opens `/admin`. The sidebar includes admin overview, resources, and
-all reservations. The overview shows resources by status/category, availability
-now, today's confirmed bookings, ongoing/upcoming bookings, and reservation
-history counts. Refresh retrieves current statistics from PostgreSQL.
+The assessment administrator login supplied for review is:
 
-Apply migrations, register the intended account normally, then grant its role
-from a trusted server terminal using the configured database connection:
+| Field | Value |
+| --- | --- |
+| Sign-in page | `/login` |
+| Email | `buddhima@gmail.com` |
+| Password | `12345678` |
+| Administrator workspace | `/admin` |
+
+With no explicit destination, administrator sign-in opens `/admin`. Administrators can manage inventory at `/admin/resources` and all members' reservations at `/admin/reservations`.
+
+These credentials apply to the configured assessment database. For a fresh Supabase project, first register this account through `/signup` with the supplied credentials, then grant its administrator role from a trusted terminal connected to that project:
 
 ```sh
-npm run db:migrate
 npm run admin:access -- grant buddhima@gmail.com
 ```
 
-The requested account has been granted admin access in the configured database.
-Its existing password remains unchanged. For another environment, run the command
-after that account exists there. To revoke access:
+To revoke the grant:
 
 ```sh
 npm run admin:access -- revoke buddhima@gmail.com
 ```
 
-Roles live in the protected `public.admins` table, linked to `auth.users`. Signup
-never grants a role; user-editable metadata and request fields cannot grant admin
-access. No admin role-management endpoint is exposed. Pages and APIs independently
-verify the session and grant; role changes take effect on the next request.
+The command changes only the administrator grant; it does not create an account or set its password. Roles are stored in `public.admins`, linked to Supabase Auth users. Signup and editable profile metadata cannot grant administrator access.
 
-Admin resource management lives at `/admin/resources`. Create/edit uses the
-existing validated resource API. Availability controls set ACTIVE, INACTIVE, or
-MAINTENANCE; they cannot disable a resource with ongoing/future confirmed bookings.
-Cancel those bookings first. Permanent deletion at `DELETE /api/admin/resources/[id]`
-is allowed only without any reservation history; otherwise HTTP 409 preserves it.
-The older `DELETE /api/resources/[id]` remains safe deactivation.
+## Booking rules and engineering decisions
 
-`/admin/reservations` supports search, status filters, pagination, owner names,
-email addresses, and full booking details. Admins can cancel any upcoming or
-ongoing booking via `DELETE /api/admin/reservations/[id]`; completed bookings remain
-immutable and repeated cancellations preserve the first cancellation timestamp.
-Ordinary reservation endpoints retain owner scoping, including for admins.
-Admin responses use private/no-store headers and mutations require the same origin.
-`GET /api/admin/statistics` exposes the overview counts to admins only.
+- Start times must be in the future; end times must be later than start times. Overnight and multi-day bookings are supported.
+- Only `ACTIVE` resources can be booked. `MAINTENANCE` and `INACTIVE` resources remain in the catalog but cannot accept reservations.
+- Only `CONFIRMED` reservations block time. Intervals use an inclusive start and exclusive end, allowing one booking to start exactly when another ends.
+- Creation locks the resource row and rechecks availability in a transaction. A PostgreSQL GiST exclusion constraint separately rejects overlapping bookings, including direct database writes.
+- Availability is a snapshot refreshed by date changes or the Refresh button. Final confirmation always checks the database again.
+- Members can access and cancel only their own bookings. Cancellation releases the slot and retains history; completed bookings cannot be cancelled.
+- Resources with ongoing or future confirmed bookings cannot be made inactive or put under maintenance. Permanent deletion is allowed only when a resource has no reservation history.
+- PostgreSQL stores absolute instants as `timestamptz`; input and display use `Asia/Colombo`.
+- Supabase owns identities and passwords. Server-side session checks determine ownership, and administrator access is checked independently on protected pages and API handlers.
+- Shared availability reveals occupied time ranges without exposing booking owners, purposes, or notes. Application tables use RLS and deny direct access through the public Supabase Data API; Prisma services enforce application authorization.
+- Resource uploads accept JPG, PNG, or WebP up to 4 MB and 25 megapixels, validate the decoded image, and save an optimized WebP to public resource-image storage.
 
-`npm run dev` regenerates the Prisma client before starting Next.js. When models
-are added during development, the singleton replaces an older cached client that
-lacks the required model delegates. If a dev server still has stale generated
-modules, stop it with Ctrl+C and restart `npm run dev`.
+## Database design
 
-## Account settings
+The current database has three application entities and references Supabase's managed user entity. The foreign keys to `auth.users` are defined in SQL migrations; Prisma does not manage the Auth schema.
 
-Open Settings in the workspace sidebar or visit `/settings`. Both members and
-admins can edit their display name and change their own password. The page also
-shows their sign-in email, persisted workspace role, membership date, timezone,
-and a sign-out control. Email and role are displayed without editing controls.
+```mermaid
+erDiagram
+    AUTH_USERS ||--o| ADMINS : "may have admin grant"
+    AUTH_USERS ||--o{ RESERVATIONS : "creates"
+    RESOURCES ||--o{ RESERVATIONS : "receives"
 
-`PATCH /api/settings/account` verifies the authenticated user and same origin.
-Profile changes accept only the display name. Password changes require matching
-new passwords of 8–128 characters and verify the current password against the
-same account in a separate temporary session, which is revoked after the check.
-Existing browser session cookies are not replaced by password verification.
+    AUTH_USERS {
+        uuid id PK
+        string email
+        jsonb raw_user_meta_data
+    }
+    ADMINS {
+        uuid userId PK, FK
+        timestamptz createdAt
+    }
+    RESOURCES {
+        uuid id PK
+        string name
+        string description
+        string category
+        string location
+        int capacity
+        ResourceStatus status
+        string floor
+        string imageUrl
+        string slug UK
+        timestamptz createdAt
+        timestamptz updatedAt
+    }
+    RESERVATIONS {
+        uuid id PK
+        uuid resourceId FK
+        uuid userId FK
+        timestamptz startTime
+        timestamptz endTime
+        ReservationStatus status
+        string purpose
+        string notes
+        timestamptz cancelledAt
+        timestamptz createdAt
+        timestamptz updatedAt
+    }
+```
 
-To test: save a new name and reload; confirm it appears in the workspace header.
-Try mismatching new passwords and an incorrect current password; both must be
-rejected. With a test account, change the password, sign out, and sign back in
-with the new password. While signed out, `/settings` redirects to login and the
-settings API returns 401. Cross-origin updates return 403. Closing a tab keeps
-the session; use Sign out to end this browser’s session.
+`ResourceStatus` is `ACTIVE`, `MAINTENANCE`, or `INACTIVE`. `ReservationStatus` is `CONFIRMED` or `CANCELLED`; upcoming, ongoing, and completed are derived from reservation times. Nullable metadata fields and additional Supabase-managed user fields are documented in the [Prisma schema](prisma/schema.prisma) and [SQL migrations](prisma/migrations).
 
-`npm test` includes account validation, profile field restrictions, current
-password verification, account matching, and provider error tests.
-`npm run test:http` checks Settings redirects and API authentication/origin guards.
+Reservation foreign keys restrict deletion to preserve history. Administrator grants are removed when their Auth user is deleted. SQL migrations also contain check constraints, overlap exclusion, and triggers that Prisma's schema cannot fully represent.
 
-Sign-out redirects with a full page navigation after the server responds, clearing
-the current tab’s cached authenticated view. A notification also redirects other
-open workspace tabs to login; switching tabs without signing out keeps the session.
-Restoring a workspace page from browser history reloads it to verify its cookies.
-Logout requests have a 10-second server deadline and a 15-second browser timeout;
-failures show an error and re-enable the button instead of staying on “Signing out…”.
+## Project structure
 
-To check multiple tabs, open the workspace twice, sign out in one tab, then return
-to the other. Both should show login. Sign in again and switch tabs without clicking
-Sign out; both should stay signed in. Disconnect the network and try signing out:
-an error should appear and the button should allow another attempt.
+```text
+src/app/          Pages, layouts, and API Route Handlers
+src/components/   Forms, workspace views, and shared UI
+src/lib/          Sessions, validation, timezone helpers, and database configuration
+src/services/     Resource, reservation, account, and administrator business logic
+src/types/        Shared application types
+prisma/           Schema, SQL migrations, and resource seed data
+scripts/          Database checks, seeding, and administrator provisioning
+tests/            Unit, database integration, and HTTP access checks
+docs/             Authentication and resource API documentation
+certs/            Public CA certificate used for PostgreSQL TLS
+```
 
-## Landing page motion
+Server Components load data through server-side services. Client Components handle forms and interactions, and Route Handlers validate and authorize requests before calling services. See the [service architecture](src/services/README.md) and [resource API documentation](docs/resource-management.md).
 
-The existing landing page uses GSAP for a line-by-line headline entrance, a drawn
-underline, staggered section/card reveals, a reading-progress line, a workflow
-connector reveal, and a subtle desktop perspective effect on the product preview. Its
-layout, content, navigation, and calls to action are preserved. Styling refinements
-are scoped to `.reserva-landing`, including typography, soft background lighting,
-card depth, a contrasting middle feature card, navigation underlines, button shine,
-and pointer-following card lighting on devices with a precise pointer.
+Generated Prisma files, dependencies, build output, local environment files, and test artifacts are excluded from Git. The Prisma client is regenerated by install, development, build, and typecheck commands.
 
-Animations respect `prefers-reduced-motion`, and GSAP contexts are reverted on
-unmount or when the media query changes; pointer listeners are also removed. The page renders visible content without
-JavaScript. To review, open `/`, scroll through each section, check mobile widths,
-and enable reduced motion in your browser’s rendering settings.
+## Verification
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run test:http
+```
+
+Unit tests require no database. HTTP checks require the production build and start and stop their own temporary server to check redirects, authentication, same-origin protection, and sign-out.
+
+To run database integration checks against a configured project:
+
+```sh
+npm run db:check
+npm run test:integration
+```
+
+Resource checks run in a rolled-back transaction. Reservation and administrator checks create temporary fixtures and remove their generated records. Reservation checks require an existing Auth user; administrator checks require an existing administrator and a second Auth user. These suites cover ownership, cancellation, adjacency, availability, concurrent booking attempts, database constraints, administrator permissions, and history protection.
+
+The [GitHub Actions workflow](.github/workflows/ci.yml) runs lint, typecheck, unit tests, a production build, and HTTP access checks on pushes to `main` or manual dispatch. It uses placeholder environment settings and does not run database integration checks or deploy the application.
+
+### Suggested review walkthrough
+
+1. Sign in as the administrator and create a temporary resource. Edit it, reload, and confirm persistence.
+2. Sign up as a member, open Availability, and reserve a future free window.
+3. Attempt an overlapping booking and verify rejection. Verify an adjacent booking is allowed.
+4. Cancel a booking, confirm its history remains, and reserve the released slot again.
+5. Use another member account to verify ownership protection. Return as administrator to review all bookings and cancel a member's upcoming reservation.
+6. Check small-screen layouts, validation feedback, empty states, and sign-out across two open tabs.
+
+## Assessment submission materials
+
+| Deliverable | Location / status |
+| --- | --- |
+| Complete application source and setup instructions | [GitHub repository](https://github.com/buddhima21/reserva) and this README |
+| Entity relationship diagram | [Shareable database-design section](https://github.com/buddhima21/reserva#database-design); available after this README is pushed |
+| 3-5 minute demonstration video | Recording link still to be added before submission |
+
+The demonstration should explain the resource-coordination problem, show the booking/conflict/cancellation flow, and describe the authorization, database, and concurrency decisions. Submit accessible repository, video, and ER diagram links through the official assessment form.
